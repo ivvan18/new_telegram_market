@@ -1,1 +1,6 @@
+#the additional files of pycharm 
 .idea
+
+#the byte code of compliers
+__pycache__
+app/**/__pycache__
