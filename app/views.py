@@ -9,6 +9,11 @@ def index():
 
 
 @app.route('/marketplace')
-def about():
+def marcketplace():
     return render_template("marketplace.html")
+
+
+@app.route('/tos')
+def terms():
+    return render_template("tos.html")
 

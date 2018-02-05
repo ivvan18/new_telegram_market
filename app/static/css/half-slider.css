@@ -37,24 +37,32 @@ body {
   border-color: #868e96;
 }
 
+/*style for lists elements*/
+.list-body {
+  padding-left: 10%;
+  padding-top: 5%;
+  padding-bottom: 5%;
+}
+
+
 /*////////////////*/
 
 /*media queries for text size in carousel slides*/
-
-@media (min-width: 0px) and (max-width:375px) { 
-  h3 {font-size:1rem;} 
-  p {font-size:0.75rem;} 
+@media (min-width: 0px) and (max-width:375px) {
+  h3 {font-size:1rem;}
+  p {font-size:0.75rem;}
 }
 
-@media (min-width: 375px) {  
+@media (min-width: 375px) {
   h3 {font-size: 1rem;} /*1rem = 16px*/
 }
 
 /* Small devices (landscape phones, 544px and up) */
-@media (min-width: 544px) {  
-  h3 {font-size: 1.5rem;} /*1rem = 16px*/
+@media (min-width: 544px) {
+  h3 {  font-size: 1.5rem;  }
+  /*1rem = 16px*/
 }
- 
+
 /* Medium devices (tablets, 768px and up) The navbar toggle appears at this breakpoint */
 @media (min-width: 768px) {  
   h3 {font-size:2rem;} /*1rem = 16px*/
