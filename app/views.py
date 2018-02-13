@@ -1,9 +1,11 @@
 # views.py
+from flask_mail import Message
+
 from flask import render_template, redirect, url_for, flash
 from flask_login import current_user, login_user
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
-from app import app, ContactForm, LoginForm, User
+from app import app, ContactForm, LoginForm, User, RegisterForm, db, s, mail
 
 
 #main page
@@ -50,6 +52,38 @@ def login():
         return redirect(url_for('login'))
 
     return render_template("login.html", form = form)
+
+#register page
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if current_user.is_authenticated:
+        return redirect(url_for('marketplace'))
+
+    form = RegisterForm()
+    if form.validate_on_submit():
+        if User.query.filter_by(email=(form.email.data).lower()).first():
+            flash("User already exists!")
+            return redirect(url_for('signup'))
+        hashed_password = generate_password_hash(form.password.data, method='sha256')
+        new_user = User(name=form.name.data, email=(form.email.data).lower(), password=hashed_password,
+                        type=form.type.data)
+        db.session.add(new_user)
+        db.session.commit()
+
+        #Отправка письма
+        token = s.dumps(form.email.data, salt='email-confirm')
+        msg = Message('Confirm Email', sender='ouramazingapp@gmail.com', recipients=[form.email.data])
+
+        link = url_for('confirm_email', token=token, _external=True)
+        msg.body = 'Your link is {}'.format(link)
+
+        mail.send(msg)
+
+        flash("Success! Now you can log in.")
+        return redirect(url_for('login'))
+
+    return render_template('signup.html', form=form)
+
 
 
 #error 404 page

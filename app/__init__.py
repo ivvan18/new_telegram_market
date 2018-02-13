@@ -2,11 +2,13 @@
 import os
 from flask import Flask
 from flask_bootstrap import Bootstrap
+from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField
+from itsdangerous import URLSafeTimedSerializer
+from wtforms import StringField, PasswordField, BooleanField, validators, SelectField
 from wtforms.validators import InputRequired, Email, Length
-from flask_login import current_user, LoginManager, UserMixin
+from flask_login import LoginManager, UserMixin
 
 # Initialize the app
 app = Flask(__name__, instance_relative_config=True)
@@ -24,6 +26,10 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+#Mail_settings
+mail = Mail(app)
+s = URLSafeTimedSerializer('giax5RHYLB')
 
 #represents each element in users database
 class User(UserMixin, db.Model):
@@ -48,6 +54,17 @@ class LoginForm(FlaskForm):
     remember = BooleanField('Remember me')
 
 # Initialize register form
+class RegisterForm(FlaskForm):
+    name = StringField('Name', [InputRequired(), Length(min=1, max=50)])
+    email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
+    password = PasswordField('Password', [
+        validators.DataRequired(),
+        validators.EqualTo('confirm', message='Passwords do not match.')
+    ])
+    confirm = PasswordField('Confirm Password')
+    type = SelectField('Account type',
+                       choices=[('Brand/Agency', 'Brand/Agency'), ('Creator/Influencer', 'Creator/Influencer')])
+    tos = BooleanField('I agree to <a href="/tos" style = "color: #54C571;">Terms of Service</a>', validators=[validators.DataRequired()])
 
 
 # Load the views

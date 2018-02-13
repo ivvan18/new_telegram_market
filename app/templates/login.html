@@ -5,44 +5,43 @@
 {% block title %}Login{% endblock %}
 
 {% block body %}
-    <!-- Main part -->
-        <div class="container" align = "center" style = "margin-top: 50px; margin-bottom: 50px;">
-            <h2>Login</h2>
-            {% with alerts = get_flashed_messages() %}
-                {% if alerts %}
-                    {% for alert in alerts %}
-                        {% if "Success" in alert %}
-                            <div class="col-xs-12 col-sm-6 col-sm-offset-3">
-                                <div class="alert alert-success">
-                                  {{ alert }}
-                                </div>
+    <div class="container" align = "center" style = "margin-top: 50px; margin-bottom: 50px;">
+        <h2>Login</h2>
+        {% with alerts = get_flashed_messages() %}
+            {% if alerts %}
+                {% for alert in alerts %}
+                    {% if "Success" in alert %}
+                        <div class="col-xs-12 col-sm-6 col-sm-offset-3">
+                            <div class="alert alert-success">
+                              {{ alert }}
                             </div>
-                        {% else %}
-                            <div class="col-xs-12 col-sm-6 col-sm-offset-3">
-                                <div class="alert alert-danger">
-                                  {{ alert }}
-                                </div>
+                        </div>
+                    {% else %}
+                        <div class="col-xs-12 col-sm-6 col-sm-offset-3">
+                            <div class="alert alert-danger">
+                              {{ alert }}
                             </div>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
 
-            <div class="col-xs-12 col-sm-6 col-sm-offset-3">
-                <form align = "left" method="POST" action="/login">
-                        {{ form.hidden_tag() }}
-                        {{ wtf.form_field(form.email, horizontal_columns=('sm', 1, 5)) }}
-                        {{ wtf.form_field(form.password, horizontal_columns=('sm', 2, 10)) }}
-                        {{ wtf.form_field(form.remember) }}
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-style">Login</button>
-                    </div>
-                    <div>
-                        Forgot your password? <a href="/reset" style = "color: #54C571;">Reset Password</a><br>
-                        Don't have an account? <a href="/signup" style = "color: #54C571;" >Sign Up</a>
-                    </div>
-                </form>
-            </div>
+        <div class="col-xs-12 col-sm-6 col-sm-offset-3">
+            <form align = "left" method="POST" action="/login">
+                    {{ form.hidden_tag() }}
+                    {{ wtf.form_field(form.email, horizontal_columns=('sm', 1, 5)) }}
+                    {{ wtf.form_field(form.password, horizontal_columns=('sm', 2, 10)) }}
+                    {{ wtf.form_field(form.remember) }}
+                <div class="form-group">
+                    <button type="submit" class="btn btn-style">Login</button>
+                </div>
+                <div>
+                    Forgot your password? <a href="/reset" style = "color: #54C571;">Reset Password</a><br>
+                    Don't have an account? <a href="/signup" style = "color: #54C571;" >Sign Up</a>
+                </div>
+            </form>
         </div>
+    </div>
 {% endblock %}
