@@ -1,9 +1,54 @@
 # app/__init__.py
-
+import os
 from flask import Flask
+from flask_bootstrap import Bootstrap
+from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField
+from wtforms.validators import InputRequired, Email, Length
+from flask_login import current_user, LoginManager, UserMixin
 
 # Initialize the app
 app = Flask(__name__, instance_relative_config=True)
+Bootstrap(app)
+
+db_path = os.path.join(os.path.dirname(__file__), 'users.db')
+channels_path = os.path.join(os.path.dirname(__file__), 'channels.db')
+db_uri = 'sqlite:///{}'.format(db_path)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+app.config['SQLALCHEMY_BINDS'] = {'channels': 'sqlite:///{}'.format(channels_path)}
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+
+db = SQLAlchemy(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+#represents each element in users database
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    email = db.Column(db.String(50), unique=True)
+    password = db.Column(db.String(80))
+    type = db.Column(db.String(30))
+    email_confirmed = db.Column(db.Boolean(), default=0)
+    current_balance = db.Column(db.Float(), default=0)
+
+
+# Initialize contact form
+class ContactForm(FlaskForm):
+    message = StringField('Problem (no more than 400 symbols)', validators=[ Length(max=400)])
+    email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
+
+# Initialize login form
+class LoginForm(FlaskForm):
+    email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
+    password = PasswordField('Password', validators=[InputRequired()])
+    remember = BooleanField('Remember me')
+
+# Initialize register form
+
 
 # Load the views
 from app import views

@@ -24,6 +24,12 @@ body {
   color: white;
 }
 
+.header-style{
+  max-width: 500px;
+  margin: auto;
+  padding-top: 20px;
+}
+
 /* class for button's background color */
 .btn-style {
   color: white;
@@ -35,6 +41,16 @@ body {
   color: white;
   background-color: #4CC552;
   border-color: #868e96;
+}
+
+/*class for forms submit button*/
+.btn_form {
+    color: #621780;
+}
+
+.btn_form:hover {
+    color: #621780;
+    border-color: #621780;
 }
 
 /*style for lists elements*/
