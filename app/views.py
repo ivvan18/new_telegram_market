@@ -3,6 +3,7 @@ from flask_mail import Message
 
 from flask import render_template, redirect, url_for, flash
 from flask_login import current_user, login_user
+from itsdangerous import SignatureExpired
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import app, ContactForm, LoginForm, User, RegisterForm, db, s, mail
@@ -67,6 +68,7 @@ def signup():
         hashed_password = generate_password_hash(form.password.data, method='sha256')
         new_user = User(name=form.name.data, email=(form.email.data).lower(), password=hashed_password,
                         type=form.type.data)
+
         db.session.add(new_user)
         db.session.commit()
 
@@ -84,6 +86,17 @@ def signup():
 
     return render_template('signup.html', form=form)
 
+
+@app.route('/confirm_email/<token>')
+def confirm_email(token):
+    try:
+        email = s.loads(token, salt='email-confirm', max_age=3600)
+        curr = User.query.filter_by(email=email).first()
+        curr.email_confirmed = 1
+        db.session.commit()
+    except SignatureExpired:
+        return '<h1>The confirmation link has expired...</h1>'
+    return render_template('confirm_email.html')
 
 
 #error 404 page

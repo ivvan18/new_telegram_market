@@ -11,7 +11,7 @@ from wtforms.validators import InputRequired, Email, Length
 from flask_login import LoginManager, UserMixin
 
 # Initialize the app
-app = Flask(__name__, instance_relative_config=True)
+app = Flask(__name__)
 Bootstrap(app)
 
 db_path = os.path.join(os.path.dirname(__file__), 'users.db')
@@ -21,6 +21,8 @@ db_uri = 'sqlite:///{}'.format(db_path)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_BINDS'] = {'channels': 'sqlite:///{}'.format(channels_path)}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config.from_pyfile('config.cfg')
+
 
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -41,11 +43,29 @@ class User(UserMixin, db.Model):
     email_confirmed = db.Column(db.Boolean(), default=0)
     current_balance = db.Column(db.Float(), default=0)
 
+class Channel(db.Model):
+    __bind_key__ = 'channels'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    link = db.Column(db.String(50))
+    description = db.Column(db.String(200))
+    subscribers = db.Column(db.Integer)
+    price = db.Column(db.Integer)
+    category = db.Column(db.String(50))
+    image = db.Column(db.String)
+    admin_id = db.Column(db.Integer, db.ForeignKey(User.id))
+
 
 # Initialize contact form
 class ContactForm(FlaskForm):
     message = StringField('Problem (no more than 400 symbols)', validators=[ Length(max=400)])
     email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 
 # Initialize login form
 class LoginForm(FlaskForm):
