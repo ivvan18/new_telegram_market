@@ -17,6 +17,11 @@
     <!-- Custom styles for this template -->
     <link href="../static/css/half-slider.css" rel="stylesheet">
 
+    <style>
+      .zombie:active {
+         background-color: #54C571;
+      }
+    </style>
   </head>
 
   <body>
@@ -31,9 +36,6 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
-            <li class="nav-item" style="padding:8px 0 0 10px;">
-              <a class="nav-link" href="/marketplace">Marketplace</a>
-            </li>
             {% if not current_user.is_authenticated %}
             <li class="nav-item" style="padding:8px 0 0 10px;">
             		<a href="/signup" class="btn btn-style">Register For Free</a>
@@ -48,15 +50,18 @@
                   {{ current_user.name }}
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="/settings">Account settings</a>
+                  <a class="dropdown-item zombie" href="/settings">Account settings</a>
                   {% if current_user.type == 'Brand/Agency' %}
-                    <a class="dropdown-item" href="/add_marketplace">Add marketplace</a>
+                    <a class="dropdown-item zombie" href="/add_marketplace">Add channel</a>
                   {% endif %}
-                  <a class="dropdown-item" href="/logout">Log out</a>
+                  <a class="dropdown-item zombie" href="/logout">Log out</a>
                 </div>
               </div>
             </li>
             {% endif %}
+            <li class="nav-item" style="padding:8px 0 0 10px;">
+              <a class="nav-link" href="/marketplace">Marketplace</a>
+            </li>
           </ul>
         </div>
       </div>
