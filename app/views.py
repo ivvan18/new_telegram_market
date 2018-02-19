@@ -30,9 +30,15 @@ def privacy():
     return render_template("privacy.html")
 
 #contact page
-@app.route('/contact')
+@app.route('/contact', methods=['GET', 'POST'])
 def contact():
     form = ContactForm()
+    if form.validate_on_submit():
+        msg = Message('User meassage', sender='ouramazingapp@gmail.com', recipients=['ouramazingapp@gmail.com'])
+        msg.html = form.message.data
+        mail.send(msg)
+        return redirect('/')
+
     return render_template("contact.html", form = form)
 
 #login page
@@ -72,7 +78,7 @@ def signup():
         db.session.add(new_user)
         db.session.commit()
 
-        #Отправка письма
+        #Message sending
         token = s.dumps(form.email.data, salt='email-confirm')
         msg = Message('Confirm Email', sender='ouramazingapp@gmail.com', recipients=[form.email.data])
 

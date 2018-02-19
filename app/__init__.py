@@ -43,6 +43,7 @@ class User(UserMixin, db.Model):
     email_confirmed = db.Column(db.Boolean(), default=0)
     current_balance = db.Column(db.Float(), default=0)
 
+#represents each element in channels database
 class Channel(db.Model):
     __bind_key__ = 'channels'
     id = db.Column(db.Integer, primary_key=True)
@@ -61,7 +62,7 @@ class ContactForm(FlaskForm):
     message = StringField('Problem (no more than 400 symbols)', validators=[ Length(max=400)])
     email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
 
-
+#login loading
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
