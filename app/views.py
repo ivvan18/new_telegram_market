@@ -8,7 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from app.generator import getrandompassword
 
 
-from app import app, ContactForm, LoginForm, User, RegisterForm, db, s, mail, ResetForm
+from app import app, ContactForm, LoginForm, User, RegisterForm, db, s, mail, ResetForm, ChangePasswordForm, Channel
 
 
 #main page
@@ -18,8 +18,10 @@ def index():
 
 #marketplace page
 @app.route('/marketplace')
+@login_required
 def marketplace():
-    return render_template("marketplace.html")
+    channels = Channel.query.all()
+    return render_template("marketplace.html", channels = channels)
 
 #term of service page
 @app.route('/tos')
@@ -112,6 +114,26 @@ def signup():
         return redirect(url_for('login'))
 
     return render_template('signup.html', form=form)
+
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if check_password_hash(current_user.password, form.current_password.data):
+            new_hashed_password = generate_password_hash(form.new_password.data, method='sha256')
+
+            curr = User.query.filter_by(email=current_user.email).first()
+            curr.password = new_hashed_password
+
+            db.session.commit()
+            flash('Successfully updated your password')
+            return redirect(url_for('settings'))
+        else:
+            flash('Current password is wrong')
+            return redirect(url_for('settings'))
+    return render_template('settings.html', form=form)
+
 
 #sending confirmation link
 @app.route('/confirm_email/<token>')

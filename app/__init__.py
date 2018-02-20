@@ -70,9 +70,6 @@ def load_user(user_id):
 
 # Initialize login form
 class LoginForm(FlaskForm):
-    # special variable for displaying multiple forms in one template
-    action = HiddenField('login')
-
     email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
     password = PasswordField('Password', validators=[InputRequired()])
     remember = BooleanField('Remember me')
@@ -93,8 +90,14 @@ class RegisterForm(FlaskForm):
 # Initialize reset form
 class ResetForm(FlaskForm):
     email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
-    #special variable for displaying multiple forms in one template
-    action = HiddenField('reset')
+
+# Initialize change password form
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Current password', validators=[InputRequired()])
+    new_password = PasswordField('New password', validators=[InputRequired(),
+                                                             validators.EqualTo('new_password_confirm', message='Passwords do not match.')])
+    new_password_confirm = PasswordField('Confirm new password', validators=[InputRequired()])
+
 
 # Load the views
 from app import views
