@@ -1,12 +1,14 @@
 # views.py
 from flask_mail import Message
 
-from flask import render_template, redirect, url_for, flash
+from flask import render_template, redirect, url_for, flash, request
 from flask_login import current_user, login_user, login_required, logout_user
 from itsdangerous import SignatureExpired
 from werkzeug.security import check_password_hash, generate_password_hash
+from app.generator import getrandompassword
 
-from app import app, ContactForm, LoginForm, User, RegisterForm, db, s, mail
+
+from app import app, ContactForm, LoginForm, User, RegisterForm, db, s, mail, ResetForm
 
 
 #main page
@@ -48,6 +50,8 @@ def login():
         return redirect(url_for('marketplace'))
 
     form = LoginForm()
+    form1 = ResetForm()
+
     if form.validate_on_submit():
         user = User.query.filter_by(email=(form.email.data).lower()).first()
         if user:
@@ -58,7 +62,24 @@ def login():
         flash("Invalid email or/and password!")
         return redirect(url_for('login'))
 
-    return render_template("login.html", form = form)
+    if form1.validate_on_submit():
+        if not User.query.filter_by(email=form1.email.data.lower()).first():
+            flash("User with email you entered not found!")
+            return redirect(url_for('login'))
+        else:
+            new_password = getrandompassword()
+            curr = User.query.filter_by(email=form1.email.data.lower()).first()
+            curr.password = generate_password_hash(new_password, method='sha256')
+            db.session.commit()
+
+            msg = Message('Password reset', sender='ouramazingapp@gmail.com', recipients=[form1.email.data])
+            msg.html = 'Your new password is <b>{}</b>, you can change it in account settings'.format(new_password)
+            mail.send(msg)
+
+            flash('Check your email for further instructions.')
+            return redirect(url_for('login'))
+
+    return render_template("login.html", form = form, form1 = form1)
 
 #register page
 @app.route('/signup', methods=['GET', 'POST'])

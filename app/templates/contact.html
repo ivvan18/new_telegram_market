@@ -10,9 +10,9 @@
 
         <div class="col-xs-12 col-sm-6 col-sm-offset-3">
             <form align = "left" method="POST" action="/contact">
-                    {{ form.hidden_tag() }}
-                    {{ wtf.form_field(form.email, horizontal_columns=('sm', 1, 5)) }}
-                    {{ wtf.form_field(form.message, horizontal_columns=('sm', 5, 30)) }}
+                {{ form.hidden_tag() }}
+                {{ wtf.form_field(form.email, horizontal_columns=('sm', 1, 5)) }}
+                {{ wtf.form_field(form.message, horizontal_columns=('lg', 2, 4)) }}
                 <div class="form-group">
                     <button type="submit" class="btn btn-style">Send message</button>
                 </div>

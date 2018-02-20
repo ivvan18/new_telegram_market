@@ -6,7 +6,7 @@ from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from itsdangerous import URLSafeTimedSerializer
-from wtforms import StringField, PasswordField, BooleanField, validators, SelectField
+from wtforms import StringField, PasswordField, BooleanField, validators, SelectField, HiddenField
 from wtforms.validators import InputRequired, Email, Length
 from flask_login import LoginManager, UserMixin
 
@@ -70,6 +70,9 @@ def load_user(user_id):
 
 # Initialize login form
 class LoginForm(FlaskForm):
+    # special variable for displaying multiple forms in one template
+    action = HiddenField('login')
+
     email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
     password = PasswordField('Password', validators=[InputRequired()])
     remember = BooleanField('Remember me')
@@ -87,6 +90,11 @@ class RegisterForm(FlaskForm):
                        choices=[('Brand/Agency', 'Brand/Agency'), ('Creator/Influencer', 'Creator/Influencer')])
     tos = BooleanField('I agree to <a href="/tos" style = "color: #54C571;">Terms of Service</a>', validators=[validators.DataRequired()])
 
+# Initialize reset form
+class ResetForm(FlaskForm):
+    email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
+    #special variable for displaying multiple forms in one template
+    action = HiddenField('reset')
 
 # Load the views
 from app import views
