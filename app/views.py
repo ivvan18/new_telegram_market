@@ -9,33 +9,37 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.channel_info import ChannelInfo
 from app.generator import getrandompassword
+from models import User, Channel
+from forms import ChangeMailForm, ContactForm, ChangePasswordForm, ChangeUsernameForm, CreateChannelForm, LoginForm, RegisterForm, ResetForm
 
+from app import app, login_manager, db, mail, s
 
-from app import app, ContactForm, LoginForm, User, RegisterForm, db, s, mail, ResetForm, ChangePasswordForm, Channel, \
-    CreateChannelForm, ChangeUsernameForm, ChangeMailForm
-
+#login loading
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 #main page
 @app.route('/')
 def index():
-    return render_template("index.html")
+    return render_template("navbar/index.html")
 
 #marketplace page
 @app.route('/marketplace')
 @login_required
 def marketplace():
     channels = Channel.query.all()
-    return render_template("marketplace.html", channels = channels)
+    return render_template("navbar/marketplace.html", channels = channels)
 
 #term of service page
 @app.route('/tos')
 def terms():
-    return render_template("tos.html")
+    return render_template("footer/tos.html")
 
 #privacy page
 @app.route('/privacy')
 def privacy():
-    return render_template("privacy.html")
+    return render_template("footer/privacy.html")
 
 #contact page
 @app.route('/contact', methods=['GET', 'POST'])
@@ -47,7 +51,7 @@ def contact():
         mail.send(msg)
         return redirect('/')
 
-    return render_template("contact.html", form = form)
+    return render_template("footer/contact.html", form = form)
 
 #login page
 @app.route('/login',  methods=['GET', 'POST'])
@@ -85,7 +89,7 @@ def login():
             flash('Check your email for further instructions.')
             return redirect(url_for('login'))
 
-    return render_template("login.html", form = form, form1 = form1)
+    return render_template("forms/login.html", form = form, form1 = form1)
 
 #register page
 @app.route('/signup', methods=['GET', 'POST'])
@@ -120,7 +124,7 @@ def signup():
             flash('Invalid username! It must contain at least 1 english letter.')
             return redirect(url_for('login'))
 
-    return render_template('signup.html', form=form)
+    return render_template('forms/signup.html', form=form)
 
 
 @app.route('/settings', methods=['GET', 'POST'])
@@ -184,7 +188,7 @@ def settings():
             return redirect(url_for('settings'))
 
 
-    return render_template('settings.html', change_username_form = change_username_form, change_email_form = change_email_form, change_password_form = change_password_form)
+    return render_template('profile/settings.html', change_username_form = change_username_form, change_email_form = change_email_form, change_password_form = change_password_form)
 
 
 
@@ -219,7 +223,7 @@ def add_channel():
             flash('No such channel found or incorrect link given')
             return redirect(url_for('add_channel'))
 
-    return render_template('add_channel.html', form=form)
+    return render_template('profile/add_channel.html', form=form)
 
 #sending confirmation link
 @app.route('/confirm_email/<token>')
@@ -231,7 +235,7 @@ def confirm_email(token):
         db.session.commit()
     except SignatureExpired:
         return '<h1>The confirmation link has expired...</h1>'
-    return render_template('confirm_email.html')
+    return render_template('additional/confirm_email.html')
 
 
 @app.route('/logout')
@@ -245,6 +249,6 @@ def logout():
 #error 404 page
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html'), 404
+    return render_template('errors/404.html'), 404
 
 
