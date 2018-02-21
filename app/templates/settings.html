@@ -3,87 +3,134 @@
 {% block title %}Account settings{% endblock %}
 {% block body %}
 <div class="container" align = "center" style = "margin-top: 50px; margin-bottom: 50px;">
-    <h1>Edit Profile</h1>
-	<div class="row">
-      <!-- edit form column -->
-      <div class="col-md-9 personal-info">
-        <div class="alert alert-info alert-dismissable">
-          <a class="panel-close close" data-dismiss="alert">×</a>
-          <i class="fa fa-coffee"></i>
-          This is an <strong>.alert</strong>. Use this to show important messages to the user.
-        </div>
-        <h3>Personal info</h3>
+    <h2>Edit Profile</h2>
+	{% with alerts = get_flashed_messages() %}
+        {% if alerts %}
+            {% for alert in alerts %}
+                {% if "Success" in alert %}
+                    <div class="alert alert-success">
+                      {{ alert }}
+                    </div>
+                {% else %}
+                    <div class="alert alert-danger">
+                      {{ alert }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-        <form class="form-horizontal" role="form">
-          <div class="form-group">
-            <label class="col-lg-3 control-label">First name:</label>
-            <div class="col-lg-8">
-              <input class="form-control" value="Jane" type="text">
-            </div>
+
+    {% if current_user.email_confirmed == 0 %}
+        <div class="alert alert-warning">
+            <strong>Please</strong>, confirm your email!
+        </div>
+    {% endif %}
+
+    <table class="table table-responsive">
+        <tbody>
+            <tr>
+                <th>
+                    <div class = "upperleft" style = "white-space: nowrap; width: 1%;"><i class="icon-user"><strong>  Username</strong></i></div>
+                    <div class="upperleft"><a href="#" data-toggle="modal" data-target="#ChangeUsername" style="white-space: nowrap; width: 1%; color: #54C571;">edit</a></div>
+                </th>
+                <td style = "white-space: nowrap; width: 1%;">{{ current_user.name }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class = "upperleft" style = "white-space: nowrap; width: 1%;"><i class="icon-envelop"><strong>  Email</strong></i></div>
+                    <div class="upperleft"><a href="#" data-toggle="modal" data-target="#ChangeEmail" style="color: #54C571;">change mail</a></div>
+                </th>
+                <td>{{ current_user.email }}</td>
+            </tr>
+            <tr>
+                <th><i class="icon-pencil2"><strong>  Account type</strong></i></th>
+                <td>{{ current_user.type }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class = "upperleft" style = "white-space: nowrap; width: 1%;"><i class="icon-coin-dollar"><strong>  Current balance, USD</strong></i></div>
+                    <div class="upperleft"><a href="#" style="white-space: nowrap; width: 1%; color: #54C571;">deposit</a></div>
+                </th>
+                <td>{{ current_user.current_balance }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div align="left">
+        <button type="button" class="btn btn-style" data-toggle="modal" data-target="#ChangePassword">Change password</button>
+    </div>
+
+    <!-- Modal window of edit username-->
+    <div id="ChangeUsername" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Edit username</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
-          <div class="form-group">
-            <label class="col-lg-3 control-label">Last name:</label>
-            <div class="col-lg-8">
-              <input class="form-control" value="Bishop" type="text">
-            </div>
+          <div class="modal-body">
+              <form align = "left" method="POST" action="/settings">
+                  {{ change_username_form.hidden_tag() }}
+                  {{ wtf.form_field(change_username_form.name, value=current_user.name) }}
+                  <div class="form-group">
+                    <button type="submit" class="btn btn-style">Apply</button>
+                  </div>
+              </form>
           </div>
-          <div class="form-group">
-            <label class="col-lg-3 control-label">Company:</label>
-            <div class="col-lg-8">
-              <input class="form-control" value="" type="text">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="col-lg-3 control-label">Email:</label>
-            <div class="col-lg-8">
-              <input class="form-control" value="janesemail@gmail.com" type="text">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="col-lg-3 control-label">Time Zone:</label>
-            <div class="col-lg-8">
-              <div class="ui-select">
-                <select id="user_time_zone" class="form-control">
-                  <option value="Hawaii">(GMT-10:00) Hawaii</option>
-                  <option value="Alaska">(GMT-09:00) Alaska</option>
-                  <option value="Pacific Time (US &amp; Canada)">(GMT-08:00) Pacific Time (US &amp; Canada)</option>
-                  <option value="Arizona">(GMT-07:00) Arizona</option>
-                  <option value="Mountain Time (US &amp; Canada)">(GMT-07:00) Mountain Time (US &amp; Canada)</option>
-                  <option value="Central Time (US &amp; Canada)" selected="selected">(GMT-06:00) Central Time (US &amp; Canada)</option>
-                  <option value="Eastern Time (US &amp; Canada)">(GMT-05:00) Eastern Time (US &amp; Canada)</option>
-                  <option value="Indiana (East)">(GMT-05:00) Indiana (East)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="col-md-3 control-label">Username:</label>
-            <div class="col-md-8">
-              <input class="form-control" value="janeuser" type="text">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="col-md-3 control-label">Password:</label>
-            <div class="col-md-8">
-              <input class="form-control" value="11111122333" type="password">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="col-md-3 control-label">Confirm password:</label>
-            <div class="col-md-8">
-              <input class="form-control" value="11111122333" type="password">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="col-md-3 control-label"></label>
-            <div class="col-md-8">
-              <input class="btn btn-primary" value="Save Changes" type="button">
-              <span></span>
-              <input class="btn btn-default" value="Cancel" type="reset">
-            </div>
-          </div>
-        </form>
+        </div>
+
       </div>
-  </div>
+    </div>
+
+    <!-- Modal window of changing email-->
+    <div id="ChangeEmail" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Change email</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+              <form align = "left" method="POST" action="/settings">
+                  {{ change_email_form.hidden_tag() }}
+                  {{ wtf.form_field(change_email_form.current_password) }}
+                  {{ wtf.form_field(change_email_form.new_email) }}
+                  <div class="form-group">
+                    <button type="submit" class="btn btn-style">Apply</button>
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modal window of changing password-->
+    <div id="ChangePassword" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Change password</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+              <form align = "left" method="POST" action="/settings">
+                  {{ change_password_form.hidden_tag() }}
+                  {{ wtf.form_field(change_password_form.current_password) }}
+                  {{ wtf.form_field(change_password_form.new_password) }}
+                  {{ wtf.form_field(change_password_form.new_password_confirm) }}
+                  <div class="form-group">
+                    <button type="submit" class="btn btn-style">Apply</button>
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
 </div>
 {% endblock %}

@@ -3,7 +3,8 @@
 {% block title %}Marketplace{% endblock %}
 {% block body %}
     <!-- Main part -->
-    <main role="main">
+    <!-- Page Content -->
+    <div class="container" align = "center" style = "margin-top: 50px; margin-bottom: 50px;">
     {% with alerts = get_flashed_messages() %}
         {% if alerts %}
             {% for alert in alerts %}
@@ -20,11 +21,9 @@
         {% endif %}
     {% endwith %}
 
-    <!-- Page Content -->
-    <div class="container" align = "center" style = "margin-top: 50px; margin-bottom: 50px;">
       <h2>Marketplace</h2>
       <p>Here you can find a database of channels</p>
-      <table class="table">
+      <table class="table table-responsive">
         <thead>
           <tr>
             <th>Channel name</th>
@@ -36,14 +35,13 @@
         <tbody>
           {% for row in channels %}
               <tr>
-                <td>{{ row.name }}</td>
-                <td>{{ row.category }}
-                <td>{{ row.subscribers }}</td>
-                <td>{{ row.price }}</td>
+                <td style = "white-space: nowrap; width: 1%;">{{ row.name }}</td>
+                <td style = "white-space: nowrap; width: 1%;">{{ row.category }} </td>
+                <td style = "white-space: nowrap; width: 1%;">{{ row.subscribers }}</td>
+                <td style = "white-space: nowrap; width: 1%;">{{ row.price }}</td>
               </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
-    </main>
 {% endblock %}

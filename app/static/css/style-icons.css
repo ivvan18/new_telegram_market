@@ -1,0 +1,59 @@
+@font-face {
+  font-family: 'icomoon';
+  src:  url('../fonts/icomoon.eot?huwm6g');
+  src:  url('../fonts/icomoon.eot?huwm6g#iefix') format('embedded-opentype'),
+    url('../fonts/icomoon.ttf?huwm6g') format('truetype'),
+    url('../fonts/icomoon.woff?huwm6g') format('woff'),
+    url('../fonts/icomoon.svg?huwm6g#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-pencil2:before {
+  content: "\e906";
+}
+.icon-image:before {
+  content: "\e90d";
+}
+.icon-folder:before {
+  content: "\e92f";
+}
+.icon-coin-dollar:before {
+  content: "\e93b";
+}
+.icon-phone:before {
+  content: "\e942";
+}
+.icon-address-book:before {
+  content: "\e944";
+}
+.icon-envelop:before {
+  content: "\e945";
+}
+.icon-bubble2:before {
+  content: "\e96e";
+}
+.icon-user:before {
+  content: "\e971";
+}
+.icon-fire:before {
+  content: "\e9a9";
+}
+.icon-plus:before {
+  content: "\ea0a";
+}

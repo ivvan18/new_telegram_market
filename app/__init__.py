@@ -6,7 +6,7 @@ from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from itsdangerous import URLSafeTimedSerializer
-from wtforms import StringField, PasswordField, BooleanField, validators, SelectField, HiddenField
+from wtforms import StringField, PasswordField, BooleanField, validators, SelectField, IntegerField
 from wtforms.validators import InputRequired, Email, Length
 from flask_login import LoginManager, UserMixin
 
@@ -97,6 +97,40 @@ class ChangePasswordForm(FlaskForm):
     new_password = PasswordField('New password', validators=[InputRequired(),
                                                              validators.EqualTo('new_password_confirm', message='Passwords do not match.')])
     new_password_confirm = PasswordField('Confirm new password', validators=[InputRequired()])
+
+# Initialize change username channel form
+class ChangeUsernameForm(FlaskForm):
+    name = StringField('Name', [InputRequired(), Length(min=1, max=50)])
+
+
+# Initialize change username channel form
+class ChangeMailForm(FlaskForm):
+    current_password = PasswordField('Current password', validators=[InputRequired()])
+    new_email = StringField('New email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
+
+
+# Initialize create channel form
+class CreateChannelForm(FlaskForm):
+    link = StringField('Channel link', [InputRequired(), Length(min=1, max=50)])
+    name = StringField('Channel name')
+    category_choices = [('cars', 'cars'), ('business', 'business'),
+                        ('realty', 'realty'), ('medicine and health', 'medicine and health'),
+                        ('marketing', 'marketing'), ('work', 'work'),
+                        ('travelling', 'travelling'), ('for women', 'for women'),
+                        ('sport', 'sport'), ('culture', 'culture'),
+                        ('education', 'education'), ('products and services', 'products and services'),
+                        ('18+', '18+'), ('design and decor', 'design and decor'),
+                        ('games', 'games'), ('entertainment', 'entertainment'),
+                        ('media', 'media'), ('science and technology', 'science and technology'),
+                        ('culinary', 'culinary'), ('foreign languages', 'foreign languages'),
+                        ('motivation and self-education', 'motivation and self-education'),
+                        ('music', 'music'), ('cinematography', 'cinematography'),
+                        ('top', 'top')]
+    category = SelectField('Category', choices=category_choices)
+    description = StringField('Channel description', [InputRequired(), Length(max=200)])
+    subscribers = IntegerField('Number of subscribers')
+    price = IntegerField('Price', validators=[InputRequired()])
+
 
 
 # Load the views

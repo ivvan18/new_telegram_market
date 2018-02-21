@@ -131,3 +131,19 @@ Custom media queries
 .featurette-divider {
   margin:2rem 0; /* Space out the Bootstrap <hr> more */
 }
+
+.upperleft {
+  display: block;
+  text-align: left;
+  vertical-align: top;
+}
+.middlecenter {
+  display: block;
+  text-align: center;
+  vertical-align: middle;
+}
+.lowercenter {
+  display: block;
+  text-align: center;
+  vertical-align: bottom;
+}
