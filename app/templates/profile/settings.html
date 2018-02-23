@@ -31,25 +31,25 @@
         <tbody>
             <tr>
                 <th>
-                    <div class = "upperleft" style = "white-space: nowrap; width: 1%;"><i class="icon-user"><strong>  Username</strong></i></div>
+                    <div class = "upperleft" style = "white-space: nowrap; width: 1%;"><i class="icon-user"></i>  Username</div>
                     <div class="upperleft"><a href="#" data-toggle="modal" data-target="#ChangeUsername" style="white-space: nowrap; width: 1%; color: #54C571;">edit</a></div>
                 </th>
                 <td style = "white-space: nowrap; width: 1%;">{{ current_user.name }}</td>
             </tr>
             <tr>
                 <th>
-                    <div class = "upperleft" style = "white-space: nowrap; width: 1%;"><i class="icon-envelop"><strong>  Email</strong></i></div>
+                    <div class = "upperleft" style = "white-space: nowrap; width: 1%;"><i class="icon-envelop"></i>  Email</div>
                     <div class="upperleft"><a href="#" data-toggle="modal" data-target="#ChangeEmail" style="color: #54C571;">change mail</a></div>
                 </th>
                 <td>{{ current_user.email }}</td>
             </tr>
             <tr>
-                <th><i class="icon-pencil2"><strong>  Account type</strong></i></th>
+                <th><i class="icon-pencil2"></i>  Account type</th>
                 <td>{{ current_user.type }}</td>
             </tr>
             <tr>
                 <th>
-                    <div class = "upperleft" style = "white-space: nowrap; width: 1%;"><i class="icon-coin-dollar"><strong>  Current balance, USD</strong></i></div>
+                    <div class = "upperleft" style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"><i class="icon-coin-dollar"></i>  Current balance, USD</div>
                     <div class="upperleft"><a href="#" style="white-space: nowrap; width: 1%; color: #54C571;">deposit</a></div>
                 </th>
                 <td>{{ current_user.current_balance }}</td>

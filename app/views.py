@@ -63,7 +63,7 @@ def login():
     form1 = ResetForm()
 
     if form.validate_on_submit():
-        user = User.query.filter_by(email=(form.email.data).lower()).first()
+        user = db.session.query(User).filter_by(email=(form.email.data).lower()).first()
         if user:
             if check_password_hash(user.password, form.password.data):
                 login_user(user, remember=form.remember.data)
@@ -73,12 +73,12 @@ def login():
         return redirect(url_for('login'))
 
     if form1.validate_on_submit():
-        if not User.query.filter_by(email=form1.email.data.lower()).first():
+        if not db.session.query(User).filter_by(email=form1.email.data.lower()).first():
             flash("User with email you entered not found!")
             return redirect(url_for('login'))
         else:
             new_password = getrandompassword()
-            curr = User.query.filter_by(email=form1.email.data.lower()).first()
+            curr = db.session.query(User).filter_by(email=form1.email.data.lower()).first()
             curr.password = generate_password_hash(new_password, method='sha256')
             db.session.commit()
 
@@ -99,7 +99,7 @@ def signup():
 
     form = RegisterForm()
     if form.validate_on_submit():
-        if User.query.filter_by(email=(form.email.data).lower()).first():
+        if db.session.query(User).filter_by(email=(form.email.data).lower()).first():
             flash("User already exists!")
             return redirect(url_for('signup'))
         hashed_password = generate_password_hash(form.password.data, method='sha256')
@@ -122,7 +122,7 @@ def signup():
             return redirect(url_for('login'))
         else:
             flash('Invalid username! It must contain at least 1 english letter.')
-            return redirect(url_for('login'))
+            return redirect(url_for('signup'))
 
     return render_template('forms/signup.html', form=form)
 
@@ -148,12 +148,12 @@ def settings():
 
     #actions with changing email
     if change_email_form.validate_on_submit():
-        if User.query.filter_by(email=(change_email_form.new_email.data).lower()).first():
+        if db.session.query(User).filter_by(email=(change_email_form.new_email.data).lower()).first():
             flash("Error! User with the given email already exists! ")
             return redirect(url_for('settings'))
 
         if check_password_hash(current_user.password, change_email_form.current_password.data):
-            curr = User.query.filter_by(email=(current_user.email).lower()).first()
+            curr = db.session.query(User).filter_by(email=(current_user.email).lower()).first()
             curr.email = change_email_form.new_email.data
             # Message sending
             token = s.dumps(change_email_form.new_email.data, salt='email-confirm')
@@ -177,7 +177,7 @@ def settings():
         if check_password_hash(current_user.password, change_password_form.current_password.data):
             new_hashed_password = generate_password_hash(change_password_form.new_password.data, method='sha256')
 
-            curr = User.query.filter_by(email=current_user.email).first()
+            curr = db.session.query(User).filter_by(email=current_user.email).first()
             curr.password = new_hashed_password
 
             db.session.commit()
@@ -200,8 +200,8 @@ def add_channel():
         return redirect(url_for('marketplace'))
     form = CreateChannelForm()
     if form.validate_on_submit():
-        if Channel.query.filter_by(link=(form.link.data).lower()).first():
-            flash('Such marketplace already exists')
+        if db.session.query(Channel).filter_by(link=form.link.data).first():
+            flash('Such marketplace already exists!')
             return redirect(url_for('add_channel'))
         try:
             # some magic with api inside ChannelInfo object
@@ -220,7 +220,7 @@ def add_channel():
 
             return redirect(url_for('marketplace'))
         except NameError:
-            flash('No such channel found or incorrect link given')
+            flash('No such channel found or incorrect link given!')
             return redirect(url_for('add_channel'))
 
     return render_template('profile/add_channel.html', form=form)
@@ -230,7 +230,7 @@ def add_channel():
 def confirm_email(token):
     try:
         email = s.loads(token, salt='email-confirm', max_age=3600)
-        curr = User.query.filter_by(email=email).first()
+        curr = db.session.query(User).filter_by(email=email).first()
         curr.email_confirmed = 1
         db.session.commit()
     except SignatureExpired:

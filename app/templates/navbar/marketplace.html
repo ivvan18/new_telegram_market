@@ -26,19 +26,19 @@
       <table class="table table-responsive">
         <thead>
           <tr>
-            <th>Channel name</th>
-            <th>Category</th>
-            <th>Subscribers</th>
-            <th>Price</th>
+            <th>Channel name <i class = "icon-profile"></i></th>
+            <th>Category <i class="icon-stack"></i></th>
+            <th>Subscribers <i class="icon-users"></i></th>
+            <th>Price <i class="icon-coin-dollar"></i></th>
           </tr>
         </thead>
         <tbody>
           {% for row in channels %}
               <tr>
-                <td style = "white-space: nowrap; width: 1%;">{{ row.name }}</td>
-                <td style = "white-space: nowrap; width: 1%;">{{ row.category }} </td>
-                <td style = "white-space: nowrap; width: 1%;">{{ row.subscribers }}</td>
-                <td style = "white-space: nowrap; width: 1%;">{{ row.price }}</td>
+                <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ row.name }}</td>
+                <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ row.category }} </td>
+                <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ row.subscribers }}</td>
+                <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ row.price }}</td>
               </tr>
           {% endfor %}
         </tbody>

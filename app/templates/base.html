@@ -41,7 +41,7 @@
             <li class="nav-item" style="padding:8px 0 0 10px;">
             		<a href="/signup" class="btn btn-style">Register For Free</a>
             </li>
-            <li class="nav-item" style="padding:8px 0 0 10px;">
+            <li class="nav-item" style="padding:8px 0 0 10px;"></i>
               <a class="nav-link" href="/login">Login</a>
             </li>
             {% else %}
@@ -51,12 +51,12 @@
                   {{ current_user.name }}
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item zombie" href="/settings">Account settings</a>
+                  <a class="dropdown-item zombie" href="/settings"><i class = "icon-cogs"></i><strong> Account settings</strong></a>
                   {% if current_user.type == 'Brand/Agency' %}
-                    <a class="dropdown-item zombie" href="/add_channel">Add channel</a>
+                  <a class="dropdown-item zombie" href="/add_channel"><i class="icon-plus"></i><strong> Add channel</strong></a>
                   {% endif %}
                   <hr>
-                  <a class="dropdown-item zombie" href="/logout">Log out</a>
+                  <a class="dropdown-item zombie" href="/logout"><i class="icon-user-minus"></i><strong> Log out</strong></a>
                 </div>
               </div>
             </li>
