@@ -229,9 +229,9 @@ def add_channel():
 @app.route('/channel/<r>')
 @login_required
 def channel(r):
-    chan = Channel.query.filter_by(link='@'+r).first()
+    chan = db.session.query(Channel).filter_by(link= '@'+r).first()
     if not chan:
-        abort(404)
+       abort(404)
     return render_template('channel.html', chan=chan)
 
 
