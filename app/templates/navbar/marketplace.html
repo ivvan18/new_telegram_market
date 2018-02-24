@@ -5,6 +5,7 @@
     <!-- Main part -->
     <!-- Page Content -->
     <div class="container" align = "center" style = "margin-top: 50px; margin-bottom: 50px;">
+
     {% with alerts = get_flashed_messages() %}
         {% if alerts %}
             {% for alert in alerts %}
@@ -35,7 +36,7 @@
         <tbody>
           {% for row in channels %}
               <tr>
-                <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ row.name }}</td>
+                  <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"><a style = "color: #54C571;" href="/channel/{{ row.link[1:] }}">{{ row.name }}</a></td>
                 <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ row.category }} </td>
                 <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ row.subscribers }}</td>
                 <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ row.price }}</td>

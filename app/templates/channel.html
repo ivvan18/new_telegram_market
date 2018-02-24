@@ -1,0 +1,68 @@
+<!-- channel.html-->
+{% extends "base.html" %}
+{% block title %}Channel Info{% endblock %}
+{% block body %}
+<!-- Page Content -->
+<div class="container" align = "center" style = "margin-top: 50px; margin-bottom: 50px;">
+    <h2>Channel info</h2>
+    <div class="page-body">
+
+        {% with alerts = get_flashed_messages() %}
+            {% if alerts %}
+                {% for alert in alerts %}
+                    {% if "Success" in alert %}
+                        <div class="alert alert-success">
+                          {{ alert }}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger">
+                          {{ alert }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+
+        {% if chan.image == None %}
+            <img src="../static/images/rsz_1no_photo.jpg">
+        {% else %}
+            <img src="../static/images/channel_icons/{{chan.link}}.jpg">
+        {% endif %}
+        <p>Channel name: {{ chan.name }}</p>
+        <p>Description : {{ chan.description }}</p>
+        <p>Subscribers: {{ chan.subscribers }}</p>
+        <p>Category: {{ chan.category }}</p>
+        <p>Price per post: {{ chan.price }}$</p>
+        {% if current_user.type=="Creator/Influencer" %}
+           <button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal">Advertise here</button>
+        {% endif %}
+
+    </div>
+</div>
+
+
+<!-- Modal window for advertising option-->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Advertise</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+          {% if current_user.email_confirmed==0 %}
+          <div class="alert alert-warning">
+              <strong>Please, </strong>confirm your email to continue
+          </div>
+          {% else %}
+              <p>hello</p>
+          {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

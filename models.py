@@ -1,5 +1,5 @@
 from flask_login import UserMixin
-from app import db, login_manager
+from app import db
 
 #represents each element in users database
 class User(UserMixin, db.Model):
@@ -10,6 +10,7 @@ class User(UserMixin, db.Model):
     type = db.Column(db.String(30))
     email_confirmed = db.Column(db.Boolean(), default=0)
     current_balance = db.Column(db.Float(), default=0)
+    channels = db.relationship('Channel', backref='admin', lazy='dynamic')
 
 
 #represents each element in channels database
@@ -21,6 +22,8 @@ class Channel(db.Model):
     description = db.Column(db.String(200))
     subscribers = db.Column(db.Integer)
     price = db.Column(db.Integer)
+    #secret = db.Column(db.String)
+    #confirmed = db.Column(db.Boolean(), default=0)
     category = db.Column(db.String(50))
     image = db.Column(db.String)
     admin_id = db.Column(db.Integer, db.ForeignKey(User.id))

@@ -2,7 +2,7 @@
 from flask_mail import Message
 import regex as re
 
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, abort
 from flask_login import current_user, login_user, login_required, logout_user
 from itsdangerous import SignatureExpired
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -224,6 +224,16 @@ def add_channel():
             return redirect(url_for('add_channel'))
 
     return render_template('profile/add_channel.html', form=form)
+
+
+@app.route('/channel/<r>')
+@login_required
+def channel(r):
+    chan = Channel.query.filter_by(link='@'+r).first()
+    if not chan:
+        abort(404)
+    return render_template('channel.html', chan=chan)
+
 
 #sending confirmation link
 @app.route('/confirm_email/<token>')
