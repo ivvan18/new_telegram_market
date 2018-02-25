@@ -1,21 +1,14 @@
-from wtforms import StringField, PasswordField, BooleanField, validators, SelectField, IntegerField
 from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, SelectField, IntegerField, validators
 from wtforms.validators import InputRequired, Email, Length
 
 
-# Initialize contact form
-class ContactForm(FlaskForm):
-    message = StringField('Problem (no more than 400 symbols)', validators=[ Length(max=400)])
-    email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
-
-
-# Initialize login form
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
     password = PasswordField('Password', validators=[InputRequired()])
     remember = BooleanField('Remember me')
 
-# Initialize register form
+
 class RegisterForm(FlaskForm):
     name = StringField('Name', [InputRequired(), Length(min=1, max=50)])
     email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
@@ -26,31 +19,9 @@ class RegisterForm(FlaskForm):
     confirm = PasswordField('Confirm Password')
     type = SelectField('Account type',
                        choices=[('Brand/Agency', 'Brand/Agency'), ('Creator/Influencer', 'Creator/Influencer')])
-    tos = BooleanField('I agree to <a href="/tos" style = "color: #54C571;">Terms of Service</a>', validators=[validators.DataRequired()])
-
-# Initialize reset form
-class ResetForm(FlaskForm):
-    email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
-
-# Initialize change password form
-class ChangePasswordForm(FlaskForm):
-    current_password = PasswordField('Current password', validators=[InputRequired()])
-    new_password = PasswordField('New password', validators=[InputRequired(),
-                                                             validators.EqualTo('new_password_confirm', message='Passwords do not match.')])
-    new_password_confirm = PasswordField('Confirm new password', validators=[InputRequired()])
-
-# Initialize change username channel form
-class ChangeUsernameForm(FlaskForm):
-    name = StringField('Name', [InputRequired(), Length(min=1, max=50)])
+    tos = BooleanField('I agree to <a href="/tos">Terms of Service</a>', validators=[validators.DataRequired()])
 
 
-# Initialize change username channel form
-class ChangeMailForm(FlaskForm):
-    current_password = PasswordField('Current password', validators=[InputRequired()])
-    new_email = StringField('New email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
-
-
-# Initialize create channel form
 class CreateChannelForm(FlaskForm):
     link = StringField('Channel link', [InputRequired(), Length(min=1, max=50)])
     name = StringField('Channel name')
@@ -67,7 +38,36 @@ class CreateChannelForm(FlaskForm):
                         ('motivation and self-education', 'motivation and self-education'),
                         ('music', 'music'), ('cinematography', 'cinematography'),
                         ('top', 'top')]
-    category = SelectField('Category', choices=category_choices)
+    category = SelectField('Keys', choices=category_choices)
     description = StringField('Channel description', [InputRequired(), Length(max=200)])
     subscribers = IntegerField('Number of subscribers')
     price = IntegerField('Price', validators=[InputRequired()])
+
+
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Current password', validators=[InputRequired()])
+    new_password = PasswordField('New password', validators=[InputRequired(),
+                                                             validators.EqualTo('new_password_confirm',
+                                                                                message='Passwords do not match.')])
+    new_password_confirm = PasswordField('Confirm new password', validators=[InputRequired()])
+
+
+class ResetForm(FlaskForm):
+    email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
+
+
+class CreatePostForm(FlaskForm):
+    link = StringField('Your project\'s link', [Length(min=1, max=50)])
+    content = StringField('Advertisement content', [InputRequired()])
+    comment = StringField('Leave some comments', [InputRequired()])
+
+
+class TopUpBalanceForm(FlaskForm):
+    amount = IntegerField('Amount', validators=[InputRequired()])
+
+
+class WithdrawalForm(FlaskForm):
+    amount = IntegerField('Amount', validators=[InputRequired()])
+    card = IntegerField('Card', validators=[InputRequired()])
+
+
