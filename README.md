@@ -1,2 +1,2 @@
-# new_telegram_market
-New repository for our group project.
+# telegfair
+our amazing app

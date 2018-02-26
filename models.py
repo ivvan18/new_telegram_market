@@ -8,8 +8,8 @@ UTC = timezone('UTC')
 def time_now():
     return datetime.now(UTC)
 
-
 from app import db
+
 
 
 class User(UserMixin, db.Model):
@@ -69,5 +69,5 @@ class Withdrawal(db.Model):
     status = db.Column(db.String(1000))
     amount = db.Column(db.Integer)
     card = db.Column(db.Integer)
-    date = db.Column(db.TIMESTAMP, default=time_now)
+    date = db.Column(db.TIMESTAMP,  default=time_now)
     user_id = db.Column(db.Integer, db.ForeignKey(User.id))

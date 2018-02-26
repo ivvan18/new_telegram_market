@@ -12,11 +12,13 @@ from forms import LoginForm, RegisterForm, CreateChannelForm, ChangePasswordForm
     TopUpBalanceForm, WithdrawalForm
 from generator import getrandompassword
 from channel_info import ChannelInfo
+import update
 import models
 import stripe
+import datetime
 import requests
 from lxml import html
-import datetime
+
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -192,8 +194,19 @@ def privacy():
     return render_template('privacy.html')
 
 
-@app.route('/contact')
+@app.route('/contact', methods=['GET', 'POST'])
 def contact():
+    if request.method == 'POST':
+        subject = request.form['subject']
+        email = request.form['email']
+        message = request.form['message']
+
+        msg = Message(subject, sender='ouramazingapp@gmail.com', recipients=["tbago@yandex.ru"])
+        msg.body = message + " {}".format(email)
+        mail.send(msg)
+
+        flash("Thank you :) We will respond to your question as soon as we can")
+        return redirect('/contact')
     return render_template('contact.html')
 
 
@@ -207,6 +220,7 @@ def settings():
     for i in current_user.channels.all():
         for j in i.requests.all():
             req += 1
+
 
     tu = TopUpBalanceForm()
 
@@ -243,6 +257,7 @@ def settings():
         flash('Successfully replenished your balance!')
         return redirect('/settings')
 
+
     return render_template('settings.html', form=form, channels=channels, user=current_user, req=req, tu=tu)
 
 
@@ -258,6 +273,7 @@ def user(uniqid):
 
     return render_template('user.html',
                            user=curr,
+                           time_now=datetime.datetime.utcnow()
                            )
 
 
@@ -339,6 +355,7 @@ def channel(r):
         user.current_balance -= chan.price
         db.session.commit()
 
+
         flash('Great! Your request successfully sent to "%s"\'s administrator!' % chan.name)
         return redirect(url_for('marketplace'))
     return render_template('channel.html', chan=chan, form=form)
@@ -411,6 +428,31 @@ def withdrawal():
     return render_template('withdrawal.html', form=form, w=w)
 
 
+@app.route('/complain', methods=['POST', 'GET'])
+@login_required
+def complain():
+    request_post = db.session.query(models.Post).filter_by(id=int(request.args.get('post_id'))).first()
+    if not request_post.SHARELINK:
+        abort(404)
+    if request_post.declined == 1 and request_post.confirmed == 1 or request_post.confirmed == 0:
+        abort(404)
+    if not check_post(request_post=request_post, link=request_post.SHARELINK):
+        curr = db.session.query(models.User).filter_by(email=current_user.email).first()
+        curr.current_balance += request_post.channel.price
+        admin = db.session.query(models.User).filter_by(id=request_post.channel.admin.id).first()
+        admin.current_balance -= request_post.channel.price
+        request_post.declined = 1
+
+        db.session.commit()
+        flash('Great! Successful price refund!')
+        return redirect('/user/%s' % current_user.id)
+
+
+    flash('Post is valid, so calm down!')
+
+    return redirect('/user/%s' % current_user.id)
+
+
 @app.route('/accept_request', methods=['POST', 'GET'])
 @login_required
 def accept_request():
@@ -460,21 +502,6 @@ def switch_channel():
     return redirect('/user/%s' % current_user.id)
 
 
-@app.route('/complain', methods=['POST', 'GET'])
-@login_required
-def complain():
-    request_post = db.session.query(models.Post).filter_by(id=int(request.args.get('post_id'))).first()
-    if not check_post(request_post=request_post, link=request_post.SHARELINK):
-        curr = db.session.query(models.User).filter_by(email=current_user.email).first()
-        curr.current_balance += request_post.channel.price
-        admin = db.session.query(models.User).filter_by(id=request_post.channel.admin.id).first()
-        admin.current_balance -= request_post.channel.price
-
-        db.session.commit()
-        flash('Great! Successful price refund!')
-    return redirect('/user/%s' % current_user.id)
-
-
 @app.route('/remove_row', methods=['POST', 'GET'])
 @login_required
 def remove_row():
@@ -487,6 +514,8 @@ def remove_row():
 @app.route('/addfunds', methods=['GET', 'POST'])
 @login_required
 def addfunds():
+    if current_user.type == "Brand/Agency":
+        abort(404)
     form = TopUpBalanceForm()
     curr = db.session.query(models.User).filter_by(email=current_user.email).first()
 
@@ -497,7 +526,7 @@ def addfunds():
                                               source=request.form['stripeToken'])
             charge = stripe.Charge.create(
                 customer=customer,
-                amount=form.amount.data * 100,
+                amount=form.amount.data*100,
                 currency='usd',
                 description='Posting'
             )
@@ -518,6 +547,8 @@ def addfunds():
 @login_required
 def confirmSHARELINK():
     link = request.form["link"]
+    if not link:
+        return redirect('/user/%s' % current_user.id)
 
     curr = db.session.query(models.User).filter_by(id=current_user.id).first()
 
@@ -557,4 +588,5 @@ def check_post(request_post, link):
 
 
 if __name__ == '__main__':
+    # update.run()
     app.run(debug=True)

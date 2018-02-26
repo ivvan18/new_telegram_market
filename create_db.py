@@ -1,3 +1,3 @@
 from models import db
 
-db.create_all(bind={'posts'})
+db.create_all()
