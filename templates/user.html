@@ -131,6 +131,13 @@
                                   {% else %}
                                       <td><b>Already posted</b></td>
                                   {% endif %}
+                                  {% elif request.posted == 1 %}
+                                  <td scope="row">{{ loop.index }}</td>
+                                  <td id="test">{{ channel.name }}</td>
+                                  <td><a href="{{ request.link }}">{{ request.link }}</a></td>
+                                  <td><b>{{ request.content }}</b></td>
+                                  <td><b>{{ request.comment }}</b></td>
+                                  <td><b>Breaking rules detected! Funds on your virtual wallet are not valid anymore :(</b></td>
                               {% endif %}
                           </tr>
                       {% endfor %}
@@ -164,14 +171,18 @@
                   <td><b>Under Consideration</b></td>
                   <td><b>Your request is being considered by the channels administrator...</b></td>
                   <td><a href="/rollback?post_id={{ post.id }}"><button class="btn">Cancel request</button></a></td>
-                  {% elif post.posted == 1 %}
+                  {% elif post.posted == 1 and post.declined == 0%}
                   <td><b>Posted!</b></td>
                   <td><b>Now your post is on the channel! Will be there till {{ post.post_time }} UTC. Check it out -> <a href="{{ post.SHARELINK }}">{{ post.SHARELINK }}</a></b></td>
                   <td><a href="/complain?post_id={{ post.id }}"><button class="btn">Complain</button></a></td>
-                  {% elif post.confirmed == 1 %}
+                  {% elif post.confirmed == 1 and post.declined == 0 %}
                   <td><b>Accepted!</b></td>
                   <td><b>Now the administrator of the channel has 48 hours to post the ad.</b></td>
                   <td></td>
+                  {% elif post.posted == 1 and post.declined == 1 %}
+                  <td><b>Annulled!</b></td>
+                  <td><b>Your complain was considered and refunded.</b></td>
+                  <td><a href="/remove_row?post_id={{ post.id }}"><button class="btn">Remove</button></a></td>
                   {% else %}
                   <td><b>Declined</b></td>
                   <td><b>Sorry! The administrator of the channel didn't accept your ad request.</b></td>
