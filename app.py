@@ -192,9 +192,9 @@ def privacy():
     return render_template('privacy.html')
 
 
-# @app.route('/contact')
-# def contact():
-#     return render_template('contact.html')
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
 
 
 @app.route('/settings', methods=['GET', 'POST'])
@@ -380,6 +380,17 @@ def withdrawal():
         if current_user.current_balance < form.amount.data:
             flash('You do not have enough funds')
             return redirect('/withdrawal')
+
+        reserved_sum = 0
+        for channel in current_user.channels:
+            for request in channel.requests:
+                if request.posted and datetime.datetime.utcnow() < request.post_time:
+                    reserved_sum += request.channel.price
+        if current_user.current_balance - reserved_sum < form.amount.data:
+            diff = float(current_user.current_balance) - float(reserved_sum) if current_user.current_balance - reserved_sum > 0 else 0
+            flash('You\'ve got only ${} available, the rest is reserved till the end of posting duration!'.
+                  format(diff))
+            return redirect('/withdrawal')
         else:
             user = db.session.query(models.User).filter_by(email=current_user.email).first()
             user.current_balance -= form.amount.data
@@ -449,6 +460,21 @@ def switch_channel():
     return redirect('/user/%s' % current_user.id)
 
 
+@app.route('/complain', methods=['POST', 'GET'])
+@login_required
+def complain():
+    request_post = db.session.query(models.Post).filter_by(id=int(request.args.get('post_id'))).first()
+    if not check_post(request_post=request_post, link=request_post.SHARELINK):
+        curr = db.session.query(models.User).filter_by(email=current_user.email).first()
+        curr.current_balance += request_post.channel.price
+        admin = db.session.query(models.User).filter_by(id=request_post.channel.admin.id).first()
+        admin.current_balance -= request_post.channel.price
+
+        db.session.commit()
+        flash('Great! Successful price refund!')
+    return redirect('/user/%s' % current_user.id)
+
+
 @app.route('/remove_row', methods=['POST', 'GET'])
 @login_required
 def remove_row():
@@ -496,14 +522,14 @@ def confirmSHARELINK():
     curr = db.session.query(models.User).filter_by(id=current_user.id).first()
 
     request_post = db.session.query(models.Post).filter_by(id=int(request.form['request_id'])).first()
-    r = requests.get(link)
-    text = r.text
-    tree = html.fromstring(text)
-    message = tree.xpath('//meta[@name="twitter:description"]/@content')[0]
-    if request_post.link in message and request_post.content in message:
+    # r = requests.get(link)
+    # text = r.text
+    # tree = html.fromstring(text)
+    # message = tree.xpath('//meta[@name="twitter:description"]/@content')[0]
+    if check_post(request_post=request_post, link=link):
         request_post.posted = 1
         request_post.SHARELINK = link
-        now_time = datetime.datetime.now()
+        now_time = datetime.datetime.utcnow()
         delta = datetime.timedelta(days=1)
         request_post.post_time = now_time + delta
         db.session.commit()
@@ -517,6 +543,17 @@ def confirmSHARELINK():
         flash('Oops... Didn\'t find the post or it differs from the requested one.')
 
     return redirect('/user/%s' % current_user.id)
+
+
+def check_post(request_post, link):
+    r = requests.get(link)
+    text = r.text
+    tree = html.fromstring(text)
+    message = tree.xpath('//meta[@name="twitter:description"]/@content')[0]
+    if request_post.link in message and request_post.content in message:
+        return True
+    else:
+        return False
 
 
 if __name__ == '__main__':
