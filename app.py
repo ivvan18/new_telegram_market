@@ -201,6 +201,10 @@ def contact():
         email = request.form['email']
         message = request.form['message']
 
+        if subject=="" or email=="" or message=="":
+            flash("Some fields are empty")
+            return redirect('/contact')
+
         msg = Message(subject, sender='ouramazingapp@gmail.com', recipients=["tbago@yandex.ru"])
         msg.body = message + " {}".format(email)
         mail.send(msg)
