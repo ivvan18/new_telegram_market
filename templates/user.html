@@ -164,10 +164,10 @@
                   <td><b>Under Consideration</b></td>
                   <td><b>Your request is being considered by the channels administrator...</b></td>
                   <td><a href="/rollback?post_id={{ post.id }}"><button class="btn">Cancel request</button></a></td>
-                  {% elif post.posted == 1 and post.post_time > datetime.datetime.now() %}
+                  {% elif post.posted == 1 %}
                   <td><b>Posted!</b></td>
-                  <td><b>Now your post is on the channel! Will be there till {{ str(post.post_time).split('.')[0] }}. Check it out -> <a href="{{ post.SHARELINK }}">{{ post.SHARELINK }}</a></b></td>
-                  <td></td>
+                  <td><b>Now your post is on the channel! Will be there till {{ post.post_time }} UTC. Check it out -> <a href="{{ post.SHARELINK }}">{{ post.SHARELINK }}</a></b></td>
+                  <td><a href="/complain?post_id={{ post.id }}"><button class="btn">Complain</button></a></td>
                   {% elif post.confirmed == 1 %}
                   <td><b>Accepted!</b></td>
                   <td><b>Now the administrator of the channel has 48 hours to post the ad.</b></td>
