@@ -62,37 +62,39 @@
     </div>
 
     {% if current_user.type == "Brand/Agency" %}
-        <hr>
-        <table class="table table-responsive table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">My channels, №</th>
-                    <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Channel name <i class = "icon-profile"></i></th>
-                    <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Confirmed <i class="icon-checkmark"></i></th>
-                    <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Secret key <i class = "icon-key"></i></th>
-                    <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"></th>
-                </tr>
-            </thead>
-            <tbody>
-              {% for row in channels %}
-                  <tr>
-                      <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ loop.index }}</td>
-                      <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"><a style = "color: #54C571;" href="/channel/{{ row.link[1:] }}">{{ row.name }}</a></td>
-                      {% if row.confirmed==0 %}
-                          <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%; color:red;" ><strong>No</strong> <a href="/confirm_channel?secret={{ row.secret }}"><button class="btn btn-warning">Confirm</button></a></td>
-                          <td><b>{{ row.secret }}</b></td>
-                          <td><button class="btn btn-danger" data-book-id={{ row.secret }} data-toggle="modal" data-target="#exampleModal">Delete</button></td>
-                      {% else %}
-                          <td style = "color: green;"><strong>Yes</strong></td>
-                          <td></td>
-                          <td><button class="btn btn-danger" data-toggle="modal" data-target="#exampleModal">Delete</button></td>
-                      {% endif %}
-                  </tr>
-              {% endfor %}
-            </tbody>
-        </table>
+        {% if current_user.channels.count() != 0 %}
+            <hr>
+            <table class="table table-responsive table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">My channels, №</th>
+                        <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Channel name <i class = "icon-profile"></i></th>
+                        <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Confirmed <i class="icon-checkmark"></i></th>
+                        <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Secret key <i class = "icon-key"></i></th>
+                        <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Action <i class = "icon-hammer2"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                  {% for row in channels %}
+                      <tr>
+                          <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ loop.index }}</td>
+                          <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"><a style = "color: #54C571;" href="/channel/{{ row.link[1:] }}">{{ row.name }}</a></td>
+                          {% if row.confirmed==0 %}
+                              <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%; color:red;" ><strong>No</strong> <a href="/confirm_channel?secret={{ row.secret }}"><button class="btn btn-warning">Confirm</button></a></td>
+                              <td><b>{{ row.secret }}</b></td>
+                              <td><a href="/delete_channel?secret={{ row.secret }}"><button class="btn btn-danger">Delete</button></a></td>
+                          {% else %}
+                              <td style = "color: green;"><strong>Yes</strong></td>
+                              <td></td>
+                              <td><a href="/delete_channel?secret={{ row.secret }}"><button class="btn btn-danger">Delete</button></a></td>
+                          {% endif %}
+                      </tr>
+                  {% endfor %}
+                </tbody>
+            </table>
+        {%endif%}
     {%endif%}
-
+</div>
 
     <!-- Modal window of edit username-->
     <div id="ChangeUsername" class="modal fade" role="dialog">
@@ -164,6 +166,4 @@
         </div>
       </div>
     </div>
-
-</div>
 {% endblock %}

@@ -254,6 +254,22 @@ def add_channel():
     return render_template('profile/add_channel.html', form=form)
 
 
+@app.route('/delete_channel', methods=['POST', 'GET'])
+@login_required
+def delete_channel():
+    secret = request.args.get('secret')
+    ch = db.session.query(Channel).filter_by(secret=secret).first()
+    if current_user.id == ch.admin_id:
+        db.session.delete(ch)
+        db.session.commit()
+
+        flash('Successfully deleted channel from database!')
+        return redirect('/settings')
+    else:
+        flash('Ooops, something went wrong!')
+        return redirect('/settings')
+
+
 @app.route('/channel/<r>')
 @login_required
 def channel(r):
