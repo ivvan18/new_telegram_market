@@ -80,7 +80,37 @@
                           <strong>Please, </strong>confirm your email to continue.
                         </div>
                     {% else%}
+                        {% with alerts = get_flashed_messages() %}
+                          {% if alerts %}
+                              {% for alert in alerts %}
+                                  {% if "Great" in alert %}
+                                      <div class="col-xs-12 col-sm-6 col-sm-offset-3">
+                                          <div class="alert alert-success">
+                                              {{ alert }}
+                                          </div>
+                                      </div>
+                                  {% else %}
+                                      <div class="col-xs-12 col-sm-6 col-sm-offset-3">
+                                          <div class="alert alert-danger">
+                                              {{ alert }}
+                                          </div>
+                                      </div>
+                                  {% endif %}
+                              {% endfor %}
+                          {% endif %}
+                        {% endwith %}
 
+                        <div class="col-xs-12 col-sm-6 col-sm-offset-3">
+                            <form align = "left" method="POST" action="/channel/{{ chan.link[1:] }}">
+                                {{ form.hidden_tag() }}
+                                {{ wtf.form_field(form.link) }}
+                                {{ wtf.form_field(form.content) }}
+                                {{ wtf.form_field(form.comment) }}
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-style">Send request</button>
+                                </div>
+                            </form>
+                        </div>
                     {% endif %}
                 </div>
             </div>

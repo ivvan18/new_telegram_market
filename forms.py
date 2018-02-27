@@ -2,13 +2,6 @@ from wtforms import StringField, PasswordField, BooleanField, validators, Select
 from flask_wtf import FlaskForm
 from wtforms.validators import InputRequired, Email, Length
 
-
-# Initialize contact form
-class ContactForm(FlaskForm):
-    message = StringField('Problem (no more than 400 symbols)', validators=[ Length(max=400)])
-    email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])
-
-
 # Initialize login form
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[InputRequired(), Email(message='Incorrect email.'), Length(max=50)])

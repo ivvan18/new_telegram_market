@@ -10,8 +10,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.channel_info import ChannelInfo
 from app.generator import getrandompassword
-from models import User, Channel
-from forms import ChangeMailForm, ContactForm, ChangePasswordForm, ChangeUsernameForm, CreateChannelForm, LoginForm, RegisterForm, ResetForm
+from models import User, Channel, Post
+from forms import ChangeMailForm, ChangePasswordForm, ChangeUsernameForm, CreateChannelForm, LoginForm, \
+    RegisterForm, ResetForm, CreatePostForm
 
 from app import app, login_manager, db, mail, s
 
@@ -275,13 +276,34 @@ def delete_channel():
         return redirect('/settings')
 
 
-@app.route('/channel/<r>')
+@app.route('/channel/<r>', methods=['GET', 'POST'])
 @login_required
 def channel(r):
     chan = db.session.query(Channel).filter_by(link= '@'+r).first()
     if not chan:
        abort(404)
-    return render_template('channel.html', chan=chan)
+
+    create_post_form = CreatePostForm()
+    if create_post_form.validate_on_submit():
+        if current_user.current_balance < chan.price:
+            flash("You do not have enough funds to advertise here!")
+            return redirect("/channel/" + r)
+        post = Post(content=create_post_form.content.data,
+                           link=create_post_form.link.data,
+                           comment=create_post_form.comment.data,
+                           channel_id=create_post_form.id,
+                           user_id=current_user.id)
+        db.session.add(post)
+        db.session.commit()
+
+        user = db.session.query(User).filter_by(email=current_user.email).first()
+        user.current_balance -= chan.price
+        db.session.commit()
+
+
+        flash('Great! Your request successfully sent to "%s"\'s administrator!' % chan.name)
+        return redirect(url_for('marketplace'))
+    return render_template('channel.html', chan=chan, form=create_post_form)
 
 
 #sending confirmation link
