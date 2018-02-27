@@ -71,3 +71,19 @@ class CreateChannelForm(FlaskForm):
     description = StringField('Channel description', [InputRequired(), Length(max=200)])
     subscribers = IntegerField('Number of subscribers')
     price = IntegerField('Price', validators=[InputRequired()])
+
+
+# Initialize create post form
+class CreatePostForm(FlaskForm):
+    link = StringField('Your project\'s link', [Length(min=1, max=50)])
+    content = StringField('Advertisement content', [InputRequired()])
+    comment = StringField('Leave some comments', [InputRequired()])
+
+# Initialize top up balance form
+class TopUpBalanceForm(FlaskForm):
+    amount = IntegerField('Amount', validators=[InputRequired()])
+
+# Initialize withdrawal form
+class WithdrawalForm(FlaskForm):
+    amount = IntegerField('Amount', validators=[InputRequired()])
+    card = IntegerField('Card', validators=[InputRequired()])
