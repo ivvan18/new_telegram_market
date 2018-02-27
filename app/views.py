@@ -136,6 +136,7 @@ def settings():
     change_password_form = ChangePasswordForm()
 
     channels = db.session.query(Channel).filter(Channel.admin_id == current_user.id)
+
     #actions with changing username
     if change_username_form.validate_on_submit():
         if re.search('[a-zA-Z]', change_username_form.name.data):
@@ -237,13 +238,13 @@ def add_channel():
             new_channel = Channel(name=ci.name,
                                   link=form.link.data, description=form.description.data,
                                   subscribers=ci.subscribers,
-                                  price=form.price.data, category=form.category.data,
+                                  price=form.price.data, secret=getrandompassword(), category=form.category.data,
                                   image=ci.photo, admin_id=current_user.id)
 
             db.session.add(new_channel)
             db.session.commit()
 
-            flash('Great! Great! Now you can confirm ownership in account settings section!')
+            flash('Great! Now you can confirm ownership in account settings section!')
 
             return redirect(url_for('marketplace'))
         except NameError:
