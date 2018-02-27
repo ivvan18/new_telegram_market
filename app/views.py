@@ -1,8 +1,9 @@
 # views.py
 from flask_mail import Message
 import regex as re
+import requests
 
-from flask import render_template, redirect, url_for, flash, abort
+from flask import render_template, redirect, url_for, flash, abort, request
 from flask_login import current_user, login_user, login_required, logout_user
 from itsdangerous import SignatureExpired
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -28,7 +29,7 @@ def index():
 @app.route('/marketplace')
 @login_required
 def marketplace():
-    channels = Channel.query.all()
+    channels = Channel.query.filter(Channel.confirmed == 1)
     return render_template("navbar/marketplace.html", channels = channels)
 
 #term of service page
@@ -134,6 +135,7 @@ def settings():
     change_email_form = ChangeMailForm()
     change_password_form = ChangePasswordForm()
 
+    channels = db.session.query(Channel).filter(Channel.admin_id == current_user.id)
     #actions with changing username
     if change_username_form.validate_on_submit():
         if re.search('[a-zA-Z]', change_username_form.name.data):
@@ -188,8 +190,33 @@ def settings():
             return redirect(url_for('settings'))
 
 
-    return render_template('profile/settings.html', change_username_form = change_username_form, change_email_form = change_email_form, change_password_form = change_password_form)
+    return render_template('profile/settings.html', change_username_form = change_username_form, change_email_form = change_email_form, change_password_form = change_password_form, channels = channels)
 
+@app.route('/confirm_channel', methods=['POST', 'GET'])
+@login_required
+def confirm_channel():
+    secret = request.args.get('secret')
+    channel = db.session.query(Channel).filter(Channel.secret == secret)
+    if channel:
+        r = requests.get(
+            'https://api.telegram.org/bot435931033:AAHtZUDlQ0DeQVUGNIGpTFhcV1u3wXDjKJY/getChat?chat_id=%s'
+            % channel[0].link)
+        if not r.json()['ok']:
+            flash('Something went wrong!')
+            return redirect('/settings')
+        else:
+            response = r.json()['result']['description']
+            if secret in response:
+                test = db.session.query(Channel).filter_by(secret=secret).first()
+                test.confirmed = 1
+                db.session.commit()
+                flash('Successfully added your channel into our base!')
+                return redirect('/marketplace')
+            else:
+                flash('Could not find the secret key!')
+                return redirect('/settings')
+    else:
+        abort(404)
 
 
 @app.route('/add_channel', methods=['GET', 'Post'])
@@ -216,7 +243,7 @@ def add_channel():
             db.session.add(new_channel)
             db.session.commit()
 
-            flash('Great! Your channel "%s" successfully added!' % new_channel.name)
+            flash('Great! Great! Now you can confirm ownership in account settings section!')
 
             return redirect(url_for('marketplace'))
         except NameError:
