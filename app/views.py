@@ -45,14 +45,19 @@ def privacy():
 #contact page
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
-    form = ContactForm()
-    if form.validate_on_submit():
-        msg = Message('User meassage', sender='ouramazingapp@gmail.com', recipients=['ouramazingapp@gmail.com'])
-        msg.html = form.message.data
-        mail.send(msg)
-        return redirect('/')
+    if request.method == 'POST':
+        subject = request.form['subject']
+        email = request.form['email']
+        message = request.form['message']
 
-    return render_template("footer/contact.html", form = form)
+        msg = Message(subject, sender='ouramazingapp@gmail.com', recipients=["tbago@yandex.ru"])
+        msg.body = message + " {}".format(email)
+        mail.send(msg)
+
+        flash("Thank you! We will respond to your question as soon as we can.")
+        return redirect('/contact')
+    return render_template('footer/contact.html')
+
 
 #login page
 @app.route('/login',  methods=['GET', 'POST'])
