@@ -79,7 +79,10 @@
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <a class="dropdown-item zombie" href="/settings"><i class = "icon-cogs"></i><strong> Account settings</strong></a>
                   {% if current_user.type == 'Brand/Agency' %}
-                  <a class="dropdown-item zombie" href="/add_channel"><i class="icon-plus"></i><strong> Add channel</strong></a>
+                    <a class="dropdown-item zombie" href="/add_channel"><i class="icon-plus"></i><strong> Add channel</strong></a>
+                    <a class="dropdown-item zombie" href="/user/{{ current_user.id }}"><i class="icon-map"></i><strong> My requests</strong></a>
+                  {% else %}
+                    <a class="dropdown-item zombie" href="/user/{{ current_user.id }}"><i class="icon-map"></i><strong> My posts</strong></a>
                   {% endif %}
                   <hr>
                   <a class="dropdown-item zombie" href="/logout"><i class="icon-user-minus"></i><strong> Log out</strong></a>

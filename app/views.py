@@ -5,6 +5,7 @@ import stripe
 from flask_mail import Message
 import regex as re
 import requests
+from lxml import html
 
 
 from flask import render_template, redirect, url_for, flash, abort, request
@@ -373,6 +374,144 @@ def channel(r):
         flash('Great! Your request successfully sent to "%s"\'s administrator!' % chan.name)
         return redirect(url_for('marketplace'))
     return render_template('channel.html', chan=chan, form=create_post_form)
+
+@app.route('/user/<uniqid>', methods=['GET', 'POST'])
+@login_required
+def user(uniqid):
+    if str(current_user.id) != uniqid:
+        abort(404)
+    curr = db.session.query(User).filter_by(email=current_user.email).first()
+    if curr is None:
+        flash('User\'s id ' + uniqid + ' not found.')
+        return redirect(url_for('index'))
+
+    return render_template('user.html', user=curr, time_now=datetime.datetime.utcnow())
+
+
+def check_post(request_post, link):
+    r = requests.get(link)
+    text = r.text
+    tree = html.fromstring(text)
+    message = tree.xpath('//meta[@name="twitter:description"]/@content')[0]
+    if request_post.link in message and request_post.content in message:
+        return True
+    else:
+        return False
+
+
+@app.route('/complain', methods=['POST', 'GET'])
+@login_required
+def complain():
+    request_post = db.session.query(Post).filter_by(id=int(request.args.get('post_id'))).first()
+    if not request_post.SHARELINK:
+        abort(404)
+    if request_post.declined == 1 and request_post.confirmed == 1 or request_post.confirmed == 0:
+        abort(404)
+    if not check_post(request_post=request_post, link=request_post.SHARELINK):
+        curr = db.session.query(User).filter_by(email=current_user.email).first()
+        curr.current_balance += request_post.channel.price
+        admin = db.session.query(User).filter_by(id=request_post.channel.admin.id).first()
+        admin.current_balance -= request_post.channel.price
+        request_post.declined = 1
+
+        db.session.commit()
+        flash('Great! Successful price refund!')
+        return redirect('/user/%s' % current_user.id)
+
+
+    flash('Post is valid, so calm down!')
+
+    return redirect('/user/%s' % current_user.id)
+
+
+@app.route('/accept_request', methods=['POST', 'GET'])
+@login_required
+def accept_request():
+    request_post = db.session.query(Post).filter_by(id=int(request.args.get('request_id'))).first()
+    request_post.confirmed = True
+    db.session.commit()
+    flash('Great! You now have to confirm your posting via ad post\'s SHARE LINK!')
+    return redirect('/user/%s' % current_user.id)
+
+@app.route('/decline_request', methods=['POST', 'GET'])
+@login_required
+def decline_request():
+    request_post = db.session.query(Post).filter_by(id=int(request.args.get('request_id'))).first()
+    request_post.declined = 1
+    db.session.commit()
+
+    userForCashback = db.session.query(User).filter_by(id=request_post.user_id).first()
+    chan = db.session.query(Channel).filter_by(id=request_post.channel_id).first()
+    userForCashback.current_balance += chan.price
+    db.session.commit()
+
+    flash('Got rid of that one!')
+    return redirect('/user/%s' % current_user.id)
+
+@app.route('/rollback', methods=['POST', 'GET'])
+@login_required
+def rollback():
+    request_post = db.session.query(Post).filter_by(id=int(request.args.get('post_id'))).first()
+    db.session.delete(request_post)
+    db.session.commit()
+
+    userForCashback = db.session.query(User).filter_by(id=request_post.user_id).first()
+    chan = db.session.query(Channel).filter_by(id=request_post.channel_id).first()
+    userForCashback.current_balance += chan.price
+    db.session.commit()
+
+    flash('Great! Successfully canceled your request!')
+    return redirect('/user/%s' % current_user.id)
+
+
+@app.route('/switch_channel', methods=['POST', 'GET'])
+@login_required
+def switch_channel():
+    request_post = db.session.query(Post).filter_by(id=int(request.args.get('post_id'))).first()
+    return redirect('/user/%s' % current_user.id)
+
+
+@app.route('/remove_row', methods=['POST', 'GET'])
+@login_required
+def remove_row():
+    request_post = db.session.query(Post).filter_by(id=int(request.args.get('post_id'))).first()
+    db.session.delete(request_post)
+    db.session.commit()
+    return redirect('/user/%s' % current_user.id)
+
+
+@app.route('/confirmSHARELINK', methods=['POST', 'GET'])
+@login_required
+def confirmSHARELINK():
+    link = request.form["link"]
+    if not link:
+        return redirect('/user/%s' % current_user.id)
+
+    curr = db.session.query(User).filter_by(id=current_user.id).first()
+
+    request_post = db.session.query(Post).filter_by(id=int(request.form['request_id'])).first()
+    # r = requests.get(link)
+    # text = r.text
+    # tree = html.fromstring(text)
+    # message = tree.xpath('//meta[@name="twitter:description"]/@content')[0]
+    if check_post(request_post=request_post, link=link):
+        request_post.posted = 1
+        request_post.SHARELINK = link
+        now_time = datetime.datetime.utcnow()
+        delta = datetime.timedelta(days=1)
+        request_post.post_time = now_time + delta
+        db.session.commit()
+
+        t = db.session.query(Channel).filter_by(id=request_post.channel_id).first()
+        curr.current_balance += t.price
+        db.session.commit()
+        flash("Great! In 48 hours we will check out the post existence and transfer money to your virtual wallet!")
+
+    else:
+        flash('Oops... Didn\'t find the post or it differs from the requested one.')
+
+    return redirect('/user/%s' % current_user.id)
+
 
 
 #sending confirmation link
