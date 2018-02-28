@@ -50,7 +50,12 @@
             <tr>
                 <th>
                     <div class = "upperleft" style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"><i class="icon-coin-dollar"></i>  Current balance, USD</div>
-                    <div class="upperleft"><a href="#" style="white-space: nowrap; width: 1%; color: #54C571;"><i style="color: #54C571;" class="icon-box-add"></i>  deposit</a></div>
+                    {% if current_user.type == "Brand/Agency" %}
+                        <div class="upperleft"><a data-toggle="modal" data-target="#Withdrawal" href="#" style="white-space: nowrap; width: 1%; color: #54C571;"><i style="color: #54C571;" class="icon-box-remove"></i>  withdrawal</a></div>
+                    {% else %}
+                        <div class="upperleft"><a data-toggle="modal" data-target="#AddFunds" href="#" style="white-space: nowrap; width: 1%; color: #54C571;"><i style="color: #54C571;" class="icon-box-add"></i>  deposit</a></div>
+                        <div class="upperleft"><a data-toggle="modal" data-target="#Withdrawal" href="#" style="white-space: nowrap; width: 1%; color: #54C571;"><i style="color: #54C571;" class="icon-box-remove"></i>  withdrawal</a></div>
+                    {% endif %}
                 </th>
                 <td>{{ current_user.current_balance }}</td>
             </tr>
@@ -136,6 +141,83 @@
                   <div class="form-group">
                     <button type="submit" class="btn btn-style">Apply</button>
                   </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal window of adding funds-->
+    <div id="AddFunds" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Add funds</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+              <form class="form-signin" align = "left" method="POST" action="/settings">
+                  {{ add_funds_form.hidden_tag() }}
+                  {{ wtf.form_field(add_funds_form.amount) }}
+                  <div class="form-group">
+                    <script
+                        src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                        data-key="pk_test_rW2nCw0ukmmWD7KWQwIzWOlW"
+                        data-amount="{{ add_funds_form.amount.data }}"
+                        data-name="Demo Site"
+                        data-description="Example charge"
+                        data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+                        data-locale="auto">
+                    </script>
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal window of withdrawal-->
+    <div id="Withdrawal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Withdrawal</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+              <form class="form-signin" align = "left" method="POST" action="/settings">
+                  {{ withdrawal_form.hidden_tag() }}
+                  {{ wtf.form_field(withdrawal_form.card) }}
+                  {{ wtf.form_field(withdrawal_form.amount) }}
+                  <div class="form-group">
+                     <button type="submit" class="btn btn-style">Request funds</button>
+                  </div>
+                  {% if w.count() != 0%}
+                    <table class="table table-responsive table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">My withdrawals, №</th>
+                                <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Card <i class = "icon-credit-card"></i></th>
+                                <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Date <i class="icon-calendar"></i></th>
+                                <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Amount <i class = "icon-stack"></i></th>
+                                <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Status <i class = "icon-checkmark"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                          {% for row in w %}
+                              <tr>
+                                  <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ loop.index }}</td>
+                                  <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ row.card }}</td>
+                                  <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;" >{{ row.date }}</td>
+                                  <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;" >{{ row.amount }}</td>
+                                  <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;" >{{ row.status }}</td>
+                              </tr>
+                          {% endfor %}
+                        </tbody>
+                    </table>
+                  {% endif %}
               </form>
           </div>
         </div>

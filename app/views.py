@@ -1,7 +1,11 @@
 # views.py
+import datetime
+
+import stripe
 from flask_mail import Message
 import regex as re
 import requests
+
 
 from flask import render_template, redirect, url_for, flash, abort, request
 from flask_login import current_user, login_user, login_required, logout_user
@@ -10,9 +14,9 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.channel_info import ChannelInfo
 from app.generator import getrandompassword
-from models import User, Channel, Post
+from models import User, Channel, Post, Withdrawal
 from forms import ChangeMailForm, ChangePasswordForm, ChangeUsernameForm, CreateChannelForm, LoginForm, \
-    RegisterForm, ResetForm, CreatePostForm
+    RegisterForm, ResetForm, CreatePostForm, TopUpBalanceForm, WithdrawalForm
 
 from app import app, login_manager, db, mail, s
 
@@ -140,6 +144,9 @@ def settings():
     change_username_form = ChangeUsernameForm()
     change_email_form = ChangeMailForm()
     change_password_form = ChangePasswordForm()
+    add_funds_form = TopUpBalanceForm()
+    withdrawal_form = WithdrawalForm()
+
 
     channels = db.session.query(Channel).filter(Channel.admin_id == current_user.id)
 
@@ -180,6 +187,68 @@ def settings():
             flash("Error! Password does not match! ")
             return redirect(url_for('settings'))
 
+    # actions with withdrawal
+    w = Withdrawal.query.filter_by(user_id=current_user.id)
+    if withdrawal_form.validate_on_submit():
+        if current_user.current_balance < withdrawal_form.amount.data:
+            flash('You do not have enough funds!')
+            return redirect('/settings')
+
+        reserved_sum = 0
+        for channel in current_user.channels:
+            for r in channel.requests:
+                if r.posted and datetime.datetime.utcnow() < r.post_time:
+                    reserved_sum += r.channel.price
+        if current_user.current_balance - reserved_sum < withdrawal_form.amount.data:
+            diff = float(current_user.current_balance) - float(
+                reserved_sum) if current_user.current_balance - reserved_sum > 0 else 0
+            flash('You\'ve got only ${} available, the rest is reserved till the end of posting duration!'.
+                  format(diff))
+            return redirect('/settings')
+        else:
+            user = db.session.query(User).filter_by(email=current_user.email).first()
+            user.current_balance -= withdrawal_form.amount.data
+            db.session.commit()
+
+            new_withdrawal = Withdrawal(status="Request sent", amount=withdrawal_form.amount.data,
+                                        card=withdrawal_form.card.data,
+                                        user_id=current_user.id)
+            db.session.add(new_withdrawal)
+            db.session.commit()
+
+            msg = Message('Withdrawal request', sender='ouramazingapp@gmail.com', recipients=["tbago@yandex.ru"])
+            msg.body = 'User ' + current_user.email + ' wants ' + str(
+                withdrawal_form.amount.data) + ' dollars on ' + str(
+                withdrawal_form.card.data)
+            mail.send(msg)
+
+            flash('Your request was successfully sent!')
+            return redirect('/settings')
+
+
+    #actions with adding funds
+    if add_funds_form.validate_on_submit() and request.method == 'POST':
+        curr = db.session.query(User).filter_by(email=current_user.email).first()
+        if isinstance(add_funds_form.amount.data, int) and add_funds_form.amount.data > 1:
+            customer = stripe.Customer.create(email=request.form['stripeEmail'],
+                                              source=request.form['stripeToken'])
+            charge = stripe.Charge.create(
+                customer=customer,
+                amount=add_funds_form.amount.data * 100,
+                currency='usd',
+                description='Posting'
+            )
+
+            curr.current_balance = curr.current_balance + add_funds_form.amount.data
+            db.session.commit()
+
+            flash('Successfully replenished your balance!')
+            return redirect('/settings')
+        else:
+            flash('Ooops...Something went wrong')
+            return redirect('/settings')
+
+
 
     #actions with changing password
     if change_password_form.validate_on_submit():
@@ -197,7 +266,7 @@ def settings():
             return redirect(url_for('settings'))
 
 
-    return render_template('profile/settings.html', change_username_form = change_username_form, change_email_form = change_email_form, change_password_form = change_password_form, channels = channels)
+    return render_template('profile/settings.html', change_username_form = change_username_form, change_email_form = change_email_form, add_funds_form = add_funds_form, withdrawal_form = withdrawal_form, w = w, change_password_form = change_password_form, channels = channels)
 
 @app.route('/confirm_channel', methods=['POST', 'GET'])
 @login_required
@@ -291,7 +360,7 @@ def channel(r):
         post = Post(content=create_post_form.content.data,
                            link=create_post_form.link.data,
                            comment=create_post_form.comment.data,
-                           channel_id=create_post_form.id,
+                           channel_id=chan.id,
                            user_id=current_user.id)
         db.session.add(post)
         db.session.commit()
