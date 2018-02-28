@@ -322,7 +322,7 @@ def add_channel():
 
             flash('Great! Now you can confirm ownership in account settings section!')
 
-            return redirect(url_for('marketplace'))
+            return redirect(url_for('settings'))
         except NameError:
             flash('No such channel found or incorrect link given!')
             return redirect(url_for('add_channel'))
@@ -385,7 +385,7 @@ def user(uniqid):
         flash('User\'s id ' + uniqid + ' not found.')
         return redirect(url_for('index'))
 
-    return render_template('user.html', user=curr, time_now=datetime.datetime.utcnow())
+    return render_template('profile/user.html', user=curr, time_now=datetime.datetime.utcnow())
 
 
 def check_post(request_post, link):

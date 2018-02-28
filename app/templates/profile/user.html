@@ -87,7 +87,7 @@
             {% else %}
               <h1>Ain't no channel of yours.</h1>
             {% endif %}
-        {% else %}
+        {% elif user.posts.all() %}
             <table class="table table-responsive table-striped table-bordered">
                 <thead>
                     <tr>
@@ -132,6 +132,8 @@
                   {% endfor %}
                   </tbody>
             </table>
+        {% else %}
+            <h2>Ain't no post of yours!</h2>
         {% endif %}
     </div>
 {% endblock %}
