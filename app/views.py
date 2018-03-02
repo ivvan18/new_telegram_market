@@ -1,12 +1,12 @@
 # views.py
 import datetime
+import validators
 
 import stripe
 from flask_mail import Message
 import regex as re
 import requests
 from lxml import html
-
 
 from flask import render_template, redirect, url_for, flash, abort, request
 from flask_login import current_user, login_user, login_required, logout_user
@@ -21,40 +21,81 @@ from forms import ChangeMailForm, ChangePasswordForm, ChangeUsernameForm, Create
 
 from app import app, login_manager, db, mail, s
 
-#login loading
+
+# login loading
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-#main page
+
+# main page
 @app.route('/')
 def index():
     return render_template("navbar/index.html")
 
-#marketplace page
-@app.route('/marketplace')
-@login_required
+
+# marketplace page
+# @app.route('/marketplace')
+# # @login_required
+# def marketplace():
+#     channels = Channel.query.filter(Channel.confirmed == 1)
+#     return render_template("navbar/marketplace.html", channels=channels)
+
+
+@app.route('/marketplace', methods=['GET', 'POST'])
 def marketplace():
     channels = Channel.query.filter(Channel.confirmed == 1)
-    return render_template("navbar/marketplace.html", channels = channels)
+    if request.method == 'POST':
+        category = request.form['sel']
+        price = request.form['pf'].split(',')
+        subscribers = request.form['sf'].split(',')
+        if category.lower() == 'all':
+            channels = Channel.query.filter(Channel.price >= price[0]). \
+                filter(Channel.price <= price[1]). \
+                filter(Channel.subscribers >= subscribers[0]). \
+                filter(Channel.subscribers <= subscribers[1]). \
+                filter(Channel.confirmed == 1)
 
-#term of service page
+            return render_template('navbar/marketplace.html', channels=channels, curr_cat=category, curr_price=price,
+                                   curr_subs=subscribers)
+        else:
+            channels = Channel.query.filter(Channel.price >= price[0]). \
+                filter(Channel.price <= price[1]). \
+                filter(Channel.subscribers >= subscribers[0]). \
+                filter(Channel.subscribers <= subscribers[1]). \
+                filter(Channel.category == category.lower()). \
+                filter(Channel.confirmed == 1)
+
+            return render_template('navbar/marketplace.html', channels=channels, curr_cat=category, curr_price=price,
+                                   curr_subs=subscribers)
+
+    return render_template('navbar/marketplace.html', channels=channels, curr_cat='All', curr_price=[10, 10000],
+                           curr_subs=[0, 300000])
+
+
+# term of service page
 @app.route('/tos')
 def terms():
     return render_template("footer/tos.html")
 
-#privacy page
+
+# privacy page
 @app.route('/privacy')
 def privacy():
     return render_template("footer/privacy.html")
 
-#contact page
+
+# contact page
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
         subject = request.form['subject']
         email = request.form['email']
         message = request.form['message']
+
+        if not (subject and email and message):
+            flash('Empty fields!')
+            return redirect('contact')
 
         msg = Message(subject, sender='ouramazingapp@gmail.com', recipients=["tbago@yandex.ru"])
         msg.body = message + " {}".format(email)
@@ -65,8 +106,8 @@ def contact():
     return render_template('footer/contact.html')
 
 
-#login page
-@app.route('/login',  methods=['GET', 'POST'])
+# login page
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('marketplace'))
@@ -101,9 +142,10 @@ def login():
             flash('Check your email for further instructions.')
             return redirect(url_for('login'))
 
-    return render_template("forms/login.html", form = form, form1 = form1)
+    return render_template("forms/login.html", form=form, form1=form1)
 
-#register page
+
+# register page
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if current_user.is_authenticated:
@@ -122,7 +164,7 @@ def signup():
             db.session.add(new_user)
             db.session.commit()
 
-            #Message sending
+            # Message sending
             token = s.dumps(form.email.data, salt='email-confirm')
             msg = Message('Confirm Email', sender='ouramazingapp@gmail.com', recipients=[form.email.data])
 
@@ -148,10 +190,9 @@ def settings():
     add_funds_form = TopUpBalanceForm()
     withdrawal_form = WithdrawalForm()
 
-
     channels = db.session.query(Channel).filter(Channel.admin_id == current_user.id)
 
-    #actions with changing username
+    # actions with changing username
     if change_username_form.validate_on_submit():
         if re.search('[a-zA-Z]', change_username_form.name.data):
             current_user.name = change_username_form.name.data
@@ -162,8 +203,7 @@ def settings():
             flash('Invalid username! It must contain at least 1 english letter.')
             return redirect(url_for('settings'))
 
-
-    #actions with changing email
+    # actions with changing email
     if change_email_form.validate_on_submit():
         if db.session.query(User).filter_by(email=(change_email_form.new_email.data).lower()).first():
             flash("Error! User with the given email already exists! ")
@@ -174,7 +214,8 @@ def settings():
             curr.email = change_email_form.new_email.data
             # Message sending
             token = s.dumps(change_email_form.new_email.data, salt='email-confirm')
-            msg = Message('Confirm Email', sender='ouramazingapp@gmail.com', recipients=[change_email_form.new_email.data])
+            msg = Message('Confirm Email', sender='ouramazingapp@gmail.com',
+                          recipients=[change_email_form.new_email.data])
 
             link = url_for('confirm_email', token=token, _external=True)
             msg.body = 'Your link is {}'.format(link)
@@ -226,8 +267,7 @@ def settings():
             flash('Your request was successfully sent!')
             return redirect('/settings')
 
-
-    #actions with adding funds
+    # actions with adding funds
     if add_funds_form.validate_on_submit() and request.method == 'POST':
         curr = db.session.query(User).filter_by(email=current_user.email).first()
         if isinstance(add_funds_form.amount.data, int) and add_funds_form.amount.data > 1:
@@ -249,9 +289,7 @@ def settings():
             flash('Ooops...Something went wrong')
             return redirect('/settings')
 
-
-
-    #actions with changing password
+    # actions with changing password
     if change_password_form.validate_on_submit():
         if check_password_hash(current_user.password, change_password_form.current_password.data):
             new_hashed_password = generate_password_hash(change_password_form.new_password.data, method='sha256')
@@ -266,8 +304,11 @@ def settings():
             flash('Current password is wrong!')
             return redirect(url_for('settings'))
 
+    return render_template('profile/settings.html', change_username_form=change_username_form,
+                           change_email_form=change_email_form, add_funds_form=add_funds_form,
+                           withdrawal_form=withdrawal_form, w=w, change_password_form=change_password_form,
+                           channels=channels)
 
-    return render_template('profile/settings.html', change_username_form = change_username_form, change_email_form = change_email_form, add_funds_form = add_funds_form, withdrawal_form = withdrawal_form, w = w, change_password_form = change_password_form, channels = channels)
 
 @app.route('/confirm_channel', methods=['POST', 'GET'])
 @login_required
@@ -312,7 +353,7 @@ def add_channel():
             ci = ChannelInfo(form.link.data)
             form.name.data = ci.name
             new_channel = Channel(name=ci.name,
-                                  link=form.link.data, description=form.description.data,
+                                  link=ci.chat_id, description=form.description.data,
                                   subscribers=ci.subscribers,
                                   price=form.price.data, secret=getrandompassword(), category=form.category.data,
                                   image=ci.photo, admin_id=current_user.id)
@@ -349,20 +390,21 @@ def delete_channel():
 @app.route('/channel/<r>', methods=['GET', 'POST'])
 @login_required
 def channel(r):
-    chan = db.session.query(Channel).filter_by(link= '@'+r).first()
+    chan = db.session.query(Channel).filter_by(link='@' + r).first()
     if not chan:
-       abort(404)
+        abort(404)
 
     create_post_form = CreatePostForm()
+
     if create_post_form.validate_on_submit():
         if current_user.current_balance < chan.price:
             flash("You do not have enough funds to advertise here!")
             return redirect("/channel/" + r)
         post = Post(content=create_post_form.content.data,
-                           link=create_post_form.link.data,
-                           comment=create_post_form.comment.data,
-                           channel_id=chan.id,
-                           user_id=current_user.id)
+                    link=create_post_form.link.data,
+                    comment=create_post_form.comment.data,
+                    channel_id=chan.id,
+                    user_id=current_user.id)
         db.session.add(post)
         db.session.commit()
 
@@ -370,10 +412,10 @@ def channel(r):
         user.current_balance -= chan.price
         db.session.commit()
 
-
         flash('Great! Your request successfully sent to "%s"\'s administrator!' % chan.name)
         return redirect(url_for('marketplace'))
     return render_template('channel.html', chan=chan, form=create_post_form)
+
 
 @app.route('/user/<uniqid>', methods=['GET', 'POST'])
 @login_required
@@ -418,7 +460,6 @@ def complain():
         flash('Great! Successful price refund!')
         return redirect('/user/%s' % current_user.id)
 
-
     flash('Post is valid, so calm down!')
 
     return redirect('/user/%s' % current_user.id)
@@ -432,6 +473,7 @@ def accept_request():
     db.session.commit()
     flash('Great! You now have to confirm your posting via ad post\'s SHARE LINK!')
     return redirect('/user/%s' % current_user.id)
+
 
 @app.route('/decline_request', methods=['POST', 'GET'])
 @login_required
@@ -447,6 +489,7 @@ def decline_request():
 
     flash('Got rid of that one!')
     return redirect('/user/%s' % current_user.id)
+
 
 @app.route('/rollback', methods=['POST', 'GET'])
 @login_required
@@ -484,7 +527,8 @@ def remove_row():
 @login_required
 def confirmSHARELINK():
     link = request.form["link"]
-    if not link:
+    if not link or not validators.url(link):
+        flash("Link is not valid!")
         return redirect('/user/%s' % current_user.id)
 
     curr = db.session.query(User).filter_by(id=current_user.id).first()
@@ -505,7 +549,7 @@ def confirmSHARELINK():
         t = db.session.query(Channel).filter_by(id=request_post.channel_id).first()
         curr.current_balance += t.price
         db.session.commit()
-        flash("Great! In 48 hours we will check out the post existence and transfer money to your virtual wallet!")
+        flash("Great! In 24 hours we will check out the post existence and transfer money to your virtual wallet!")
 
     else:
         flash('Oops... Didn\'t find the post or it differs from the requested one.')
@@ -513,8 +557,7 @@ def confirmSHARELINK():
     return redirect('/user/%s' % current_user.id)
 
 
-
-#sending confirmation link
+# sending confirmation link
 @app.route('/confirm_email/<token>')
 def confirm_email(token):
     try:
@@ -534,10 +577,7 @@ def logout():
     return redirect(url_for('index'))
 
 
-
-#error 404 page
+# error 404 page
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('errors/404.html'), 404
-
-

@@ -35,7 +35,7 @@
               <table class="table table-responsive table-striped table-bordered">
                   <thead>
                   <tr>
-                      <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">My requests, №</th>
+{#                      <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">My requests, №</th>#}
                       <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Channel <i class="icon-profile"></i></th>
                       <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Project Link <i class="icon-link"></i></th>
                       <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Ad Content <i class = "icon-file-text"></i></th>
@@ -49,7 +49,7 @@
                       {% for request in channel.requests.all() %}
                       <tr>
                           {% if request.declined == 0 %}
-                              <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ loop.index }}</td>
+{#                              <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ loop.index }}</td>#}
                               <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ channel.name }}</td>
                               <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"><a style = "color: #54C571;" href="{{ request.link }}">{{ request.link }}</a></td>
                               <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"><b>{{ request.content }}</b></td>
@@ -72,7 +72,7 @@
                                   <td><b>Already posted. Must be on the channel till {{ request.post_time }}.</b></td>
                               {% endif %}
                           {% elif request.posted == 1 %}
-                              <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ loop.index }}</td>
+{#                              <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ loop.index }}</td>#}
                               <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ channel.name }}</td>
                               <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"><a style = "color: #54C571;" href="{{ request.link }}">{{ request.link }}</a></td>
                               <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"><b>{{ request.content }}</b></td>
@@ -91,7 +91,7 @@
             <table class="table table-responsive table-striped table-bordered">
                 <thead>
                     <tr>
-                        <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">My posts, №</th>
+{#                        <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">My posts, №</th>#}
                         <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Content <i class="icon-file-text"></i></th>
                         <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Project Link <i class="icon-link"></i></th>
                         <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Status <i class = "icon-checkmark"></i></th>
@@ -104,7 +104,7 @@
 
                   {% for post in user.posts.all() %}
                   <tr>
-                      <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ loop.index }}</td>
+{#                      <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ loop.index }}</td>#}
                       <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ post.content }}</td>
                       <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"><a style = "color:#54C571;" href="{{ post.link }}">{{ post.link }}</a></td>
                       {% if post.confirmed == 0 and post.declined == 0 %}

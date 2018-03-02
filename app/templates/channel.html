@@ -43,14 +43,14 @@
                                 <th style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;" rowspan="5">
                                     {% if chan.image == None %}
                                         <img src="../static/images/rsz_1no_photo.jpg" class="figure-img img-fluid img-thumbnail">
-                                    <p style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Default photo. Upload yours <i class="icon-image"></i></p>
+                                    <p>Default photo. Upload yours <i class="icon-image"></i></p>
                                     {% else %}
                                         <img src="../static/images/channel_icons/{{chan.link}}.jpg" class = "figure-img img-fluid img-thumbnail">
-                                        <p style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">Channel photo <i class="icon-image"></i></p>
+                                        <p>Channel photo <i class="icon-image"></i></p>
                                     {% endif %}
                                 </th>
                                 <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"><strong>Channel name </strong><i class="icon-profile"></i></td>
-                                <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;">{{ chan.name }}</td>
+                                <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"><a style="color:#54C571" href="https://t.me/{{ chan.link[1:] }}">{{ chan.name }}</td>
                             </tr>
                             <tr>
                                 <td style = "word-wrap: break-word;min-width: 160px;max-width: 160px; width: 1%;"><strong>Description </strong><i class="icon-file-text"></i></td>

@@ -1,6 +1,0 @@
-#the additional files of pycharm 
-.idea
-
-#the byte code of compilers
-__pycache__
-app/**/__pycache__

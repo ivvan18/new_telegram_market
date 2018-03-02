@@ -45,7 +45,7 @@ class ChangeMailForm(FlaskForm):
 
 # Initialize create channel form
 class CreateChannelForm(FlaskForm):
-    link = StringField('Channel link', [InputRequired(), Length(min=1, max=50)])
+    link = StringField('Channel link', [InputRequired(), Length(min=1, max=50),validators.url])
     name = StringField('Channel name')
     category_choices = [('cars', 'cars'), ('business', 'business'),
                         ('realty', 'realty'), ('medicine and health', 'medicine and health'),
